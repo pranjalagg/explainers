@@ -1,0 +1,63 @@
+.iso{
+  --rc-bone:#221f1a;--rc-trab:#3d382f;--rc-gum:#352625;--rc-pdl:#2b2522;--rc-dentin:#3a362e;--rc-enamel:#4d4b45;--rc-plate:#1c1c1c;
+  --rc-pulp:#c4474d;--rc-pulp-2:#8f3a3e;--rc-cap-in:#262624;--rc-void:#080807;--rc-fluid:#1f4a55;--rc-sealer:#5b5032;--rc-gp:#c9693f;--rc-core:#3b4248;--rc-lesion:#4a2c27;
+  --rc-steel:#5c5c62;--rc-shine:#8a8a90;--rc-crown:#4a4a46;--rc-cable:#2a2a2a;--rc-led-on:#6be0a0;
+  --rc-purple:#7c5cd6;--rc-purple-top:#9a80e8;--rc-white:#bdbdbd;--rc-white-top:#e2e2e2;--rc-yellow:#c9a42e;--rc-yellow-top:#e8c75a;
+  --rc-red:#c2393f;--rc-red-top:#e0595e;--rc-blue:#3a5cc4;--rc-blue-top:#5c7fe4;--rc-green:#2a8a5b;--rc-green-top:#40b07a;
+  --rc-black:#1c1c1c;--rc-black-top:#2e2e2e;
+}
+.iso[data-theme="light"]{
+  --rc-bone:#f1ebde;--rc-plate:#f4f4f1;--rc-trab:#d8ccb2;--rc-gum:#f3d9d4;--rc-pdl:#f6e6de;--rc-dentin:#f7f0e2;--rc-enamel:#ffffff;
+  --rc-pulp:#e0585e;--rc-pulp-2:#f0a0a2;--rc-cap-in:#e4e2dc;--rc-void:#8f877e;--rc-fluid:#a9dbe6;--rc-sealer:#ecd795;--rc-gp:#ee8a5a;--rc-core:#dbe4ec;--rc-lesion:#d6a194;
+  --rc-steel:#e4e4e8;--rc-shine:#ffffff;--rc-crown:#fbfbf9;--rc-cable:#e6e6e3;--rc-led-on:#30a46c;
+  --rc-purple:#8f6fe6;--rc-purple-top:#ab93f0;--rc-white:#ececec;--rc-white-top:#ffffff;--rc-yellow:#f0c640;--rc-yellow-top:#f8dc7c;
+  --rc-red:#e5484d;--rc-red-top:#f07a7e;--rc-blue:#3e63dd;--rc-blue-top:#6d8be8;--rc-green:#30a46c;--rc-green-top:#5fc495;
+  --rc-black:#3a3a3e;--rc-black-top:#5a5a5f;
+}
+.rc-bone{fill:var(--rc-bone)}
+.rc-gum{fill:var(--rc-gum)}
+.rc-pdl{fill:var(--rc-pdl)}
+.rc-trab{fill:none;stroke:var(--rc-trab);stroke-width:.55}
+.rc-dentin{fill:var(--rc-dentin)}
+.rc-enamel{fill:var(--rc-enamel)}
+.rc-pulp{fill:var(--rc-pulp)}
+.rc-void{fill:var(--rc-void)}
+.rc-fluid{fill:var(--rc-fluid)}
+.rc-sealer{fill:var(--rc-sealer)}
+.rc-gp,.rc-gpt{fill:var(--rc-gp)}
+.rc-core{fill:var(--rc-core)}
+.rc-lesion{fill:var(--rc-lesion);stroke:var(--anatomy-lo);stroke-width:.5;vector-effect:non-scaling-stroke}
+.rc-crown{fill:var(--rc-crown)}
+.rc-cap-in{fill:var(--rc-cap-in)}
+.rc-steel{fill:var(--rc-steel)}
+.rc-shine{fill:var(--rc-shine)}
+.rc-flutes{fill:none;stroke:var(--anatomy-mid);stroke-width:.45}
+.rc-plate{fill:var(--rc-plate)}
+.rc-hole{fill:var(--anatomy-shade-0)}
+.rc-debris circle{fill:var(--rc-pulp)}
+.rc-led{fill:var(--anatomy-faint);transition:fill .2s}
+.rc-led[data-on]{fill:var(--rc-led-on)}
+.rc-cable-o{fill:none;stroke:var(--anatomy-mid);stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.rc-cable-i{fill:none;stroke:var(--rc-cable);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.rc-pulp[data-pulse]{animation:rc-pulse 1.4s ease-in-out infinite}
+@keyframes rc-pulse{0%,100%{fill:var(--rc-pulp)}50%{fill:var(--rc-pulp-2)}}
+.rc-iso>.iso-fill,.rc-iso>.iso-shade{fill:var(--c)}
+.rc-iso>.iso-top{fill:var(--c-top)}
+.rc-c-purple{--c:var(--rc-purple);--c-top:var(--rc-purple-top)}
+.rc-c-white{--c:var(--rc-white);--c-top:var(--rc-white-top)}
+.rc-c-yellow{--c:var(--rc-yellow);--c-top:var(--rc-yellow-top)}
+.rc-c-red{--c:var(--rc-red);--c-top:var(--rc-red-top)}
+.rc-c-blue{--c:var(--rc-blue);--c-top:var(--rc-blue-top)}
+.rc-c-green{--c:var(--rc-green);--c-top:var(--rc-green-top)}
+.rc-c-black{--c:var(--rc-black);--c-top:var(--rc-black-top)}
+.rc-stage{outline:none;touch-action:pan-y;cursor:ew-resize}
+.rc-stage:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:6px}
+.rc-steps{display:flex;flex-wrap:wrap;gap:6px}
+.rc-step{font:11px/1 var(--anatomy-mono);letter-spacing:.04em;color:var(--anatomy-muted);background:transparent;border:0;box-shadow:0 0 0 1px var(--anatomy-faint);padding:7px 9px 6px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;transition:color .2s,box-shadow .2s}
+.rc-step span{color:var(--anatomy-lo)}
+.rc-step:hover{color:var(--anatomy-text);box-shadow:0 0 0 1px var(--anatomy-mid)}
+.rc-step[aria-pressed="true"]{color:var(--anatomy-strong);box-shadow:0 0 0 1px var(--anatomy-hi)}
+.rc-step[aria-pressed="true"] span{color:var(--anatomy-mid)}
+.rc-step:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.rc-pulp[data-pulse]{animation:none}}
+@media (max-width:560px){.iso-plate{overflow:hidden}.rc-stage .iso-svg{width:118%;margin:-4% -9% -2%}}

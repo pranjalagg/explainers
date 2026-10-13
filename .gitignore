@@ -1,0 +1,6 @@
+.DS_Store
+node_modules/
+# verification screenshots and local-only builds
+*/shots/
+*/*-dark.html
+*/*-artifact.html
