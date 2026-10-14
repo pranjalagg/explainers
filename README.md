@@ -5,6 +5,7 @@ Interactive isometric figures, one per folder. Each figure is a standalone HTML 
 | Folder | Figure |
 |---|---|
 | [`root-canal/`](root-canal/) | Root canal treatment: a sectioned premolar on a bench rig, through seven stages |
+| [`ct-scanner/`](ct-scanner/) | CT scanner: a gantry and rotor take projections, which are reconstructed into a slice read in Hounsfield units |
 
 ## Layout
 
