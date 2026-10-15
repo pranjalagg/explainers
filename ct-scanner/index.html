@@ -1,0 +1,1353 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>CT scanner</title><style>
+.iso{
+  --anatomy-page:#0b0b0b;--anatomy-card:#131313;--anatomy-text:#a3a3a3;--anatomy-strong:#e6e6e6;--anatomy-muted:#6e6e6e;
+  --anatomy-paper:#131313;--anatomy-face:#1b1b1b;--anatomy-top:#1c1c1c;
+  --anatomy-shade-0:#0f0f0f;--anatomy-shade-1:#121212;--anatomy-shade-2:#151515;--anatomy-shade-3:#181818;
+  --anatomy-lit-top:#262626;--anatomy-lit-shade:#1d1d1d;
+  --anatomy-hi:#d4d4d4;--anatomy-mid:#6a6a6a;--anatomy-lo:#3e3e3e;--anatomy-faint:#2a2a2a;--anatomy-lit:#ffffff;
+  --anatomy-halo:#050505;--anatomy-halo-opacity:.9;--anatomy-dot:#e6e6e6;
+  --anatomy-red:#ff6b6b;--anatomy-green:#6be0a0;--anatomy-blue:#6b9bff;
+  --anatomy-weight:.6px;--anatomy-ease:cubic-bezier(.32,.72,0,1);
+  --anatomy-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --anatomy-lift:inset 0 1px 0 0 #ffffff0a,inset 0 0 0 1px #ffffff06,0 0 0 1px #00000026,0 1px 1px -.5px #00000014,0 3px 3px -1.5px #00000014,0 6px 6px -3px #00000014,0 12px 12px -6px #00000014;
+}
+.iso[data-theme="light"]{
+  --anatomy-page:#f2f2ef;--anatomy-card:#fbfbfa;--anatomy-text:#57575a;--anatomy-strong:#18181a;--anatomy-muted:#8c8c90;
+  --anatomy-paper:#fbfbfa;--anatomy-face:#ffffff;--anatomy-top:#ffffff;
+  --anatomy-shade-0:#dcdcd9;--anatomy-shade-1:#e5e5e2;--anatomy-shade-2:#ededea;--anatomy-shade-3:#f4f4f1;
+  --anatomy-lit-top:#ffffff;--anatomy-lit-shade:#eeeeeb;
+  --anatomy-hi:#26262a;--anatomy-mid:#8a8a8f;--anatomy-lo:#b4b4b8;--anatomy-faint:#d4d4d6;--anatomy-lit:#000000;
+  --anatomy-halo:#8a8a80;--anatomy-halo-opacity:.32;--anatomy-dot:#3a3a3e;
+  --anatomy-red:#e5484d;--anatomy-green:#30a46c;--anatomy-blue:#3e63dd;
+  --anatomy-lift:inset 0 1px 0 0 #ffffff,0 0 0 1px #0000000f,0 1px 1px -.5px #0000000a,0 3px 3px -1.5px #0000000a,0 6px 6px -3px #0000000a,0 12px 12px -6px #0000000a;
+}
+.iso-svg{display:block;width:100%;height:auto;overflow:visible}
+.iso-svg path,.iso-svg circle{vector-effect:non-scaling-stroke}
+.iso-fill{fill:var(--anatomy-paper);stroke:none}
+.iso-solid[data-lit]>.iso-fill{fill:var(--anatomy-face)}
+.iso-shade,.iso-top{stroke:none}
+.iso-shade[data-shade="0"]{fill:var(--anatomy-shade-0)}
+.iso-shade[data-shade="1"]{fill:var(--anatomy-shade-1)}
+.iso-shade[data-shade="2"]{fill:var(--anatomy-shade-2)}
+.iso-shade[data-shade="3"]{fill:var(--anatomy-shade-3)}
+.iso-top{fill:var(--anatomy-top)}
+.iso-solid[data-lit]>.iso-top{fill:var(--anatomy-lit-top)}
+.iso-solid[data-lit]>.iso-shade{fill:var(--anatomy-lit-shade)}
+.iso-solid[data-seamless]>.iso-shade,.iso-solid[data-seamless]>.iso-top{stroke-width:.4;stroke-linejoin:round}
+.iso-solid[data-seamless]>.iso-shade[data-shade="0"]{stroke:var(--anatomy-shade-0)}
+.iso-solid[data-seamless]>.iso-shade[data-shade="1"]{stroke:var(--anatomy-shade-1)}
+.iso-solid[data-seamless]>.iso-shade[data-shade="2"]{stroke:var(--anatomy-shade-2)}
+.iso-solid[data-seamless]>.iso-shade[data-shade="3"]{stroke:var(--anatomy-shade-3)}
+.iso-solid[data-seamless]>.iso-top{stroke:var(--anatomy-top)}
+.iso-solid[data-seamless][data-lit]>.iso-top{stroke:var(--anatomy-lit-top)}
+.iso-solid[data-seamless][data-lit]>.iso-shade{stroke:var(--anatomy-lit-shade)}
+.iso-solid[data-lit]>.iso-edge{stroke:var(--anatomy-lit)}
+.iso-halo{fill:var(--anatomy-halo);stroke:none;filter:blur(9px);opacity:var(--anatomy-halo-opacity);transform:translateY(3px)}
+.iso-line{fill:none;stroke:var(--anatomy-lo);stroke-width:var(--anatomy-weight);stroke-linecap:round;stroke-linejoin:round}
+.iso-line[data-tone="hi"]{stroke:var(--anatomy-hi)}
+.iso-line[data-tone="mid"]{stroke:var(--anatomy-mid)}
+.iso-line[data-tone="lo"]{stroke:var(--anatomy-lo)}
+.iso-line[data-tone="faint"]{stroke:var(--anatomy-faint)}
+.iso-line[data-tone="lit"]{stroke:var(--anatomy-lit)}
+.iso-line[data-tone="red"]{stroke:var(--anatomy-red)}
+.iso-line[data-tone="green"]{stroke:var(--anatomy-green)}
+.iso-line[data-tone="blue"]{stroke:var(--anatomy-blue)}
+.iso-line[data-dotted]{stroke-dasharray:.01 3.5;stroke-width:1}
+.iso-line[data-dashed]{stroke-dasharray:3 3}
+.iso-line[data-flow]{stroke-dasharray:2 6}
+.iso-wire-end{fill:var(--anatomy-paper);stroke:var(--anatomy-lo);stroke-width:var(--anatomy-weight)}
+.iso-wire[data-tone="hi"] .iso-wire-end{stroke:var(--anatomy-hi)}
+.iso-wire[data-tone="mid"] .iso-wire-end{stroke:var(--anatomy-mid)}
+.iso-wire[data-tone="faint"] .iso-wire-end{stroke:var(--anatomy-faint)}
+.iso-wire[data-tone="lit"] .iso-wire-end{stroke:var(--anatomy-lit)}
+.iso-dots circle{fill:var(--anatomy-dot);stroke:none;opacity:.32}
+.iso-dots[data-tone="hi"] circle{opacity:.85}
+.iso-dots[data-tone="mid"] circle{opacity:.45}
+.iso-dots[data-tone="lo"] circle{opacity:.22}
+.iso-dots[data-tone="faint"] circle{opacity:.12}
+.iso-face-text{fill:var(--anatomy-mid);font-family:var(--anatomy-mono);letter-spacing:.04em}
+.iso-face-text[data-tone="hi"]{fill:var(--anatomy-hi)}
+.iso-face-text[data-tone="lo"]{fill:var(--anatomy-lo)}
+.iso-face-text[data-tone="faint"]{fill:var(--anatomy-faint)}
+.tb-body{fill:var(--anatomy-shade-2);stroke:none}
+.tb-shine{fill:var(--anatomy-top);stroke:none}
+.tb-shade{fill:var(--anatomy-shade-0);stroke:none}
+.tb-ring{fill:none;stroke:var(--anatomy-lo);stroke-width:.45;stroke-linecap:butt;stroke-linejoin:round}
+.tb-ring[data-tone="mid"]{stroke:var(--anatomy-mid)}
+.tb-ring[data-tone="faint"]{stroke:var(--anatomy-faint)}
+.tb-ring[data-tone="hi"]{stroke:var(--anatomy-hi)}
+@keyframes iso-flow{to{stroke-dashoffset:-32}}
+@keyframes iso-pulse{0%,100%{opacity:.18}12%{opacity:1}40%{opacity:.18}}
+.iso-line[data-flow]{animation:iso-flow 1600ms linear infinite}
+.iso-dots circle[data-pulse]{animation:iso-pulse 1600ms steps(1,end) infinite;animation-delay:var(--pulse-at,0ms)}
+.iso-figure{margin:32px 0 36px}
+.iso-plate{position:relative;padding:52px 24px;border-radius:0;background:var(--anatomy-card);box-shadow:0 0 0 1px var(--anatomy-mid);--anatomy-paper:var(--anatomy-card)}
+.iso-plate-corners{position:absolute;inset:18px 20px;pointer-events:none}
+.iso-plate-corner{position:absolute;color:var(--anatomy-muted);font-family:var(--anatomy-mono);font-size:10.5px;line-height:1;letter-spacing:.04em;white-space:nowrap}
+.iso-plate-corner[data-corner="fig"]{top:0;left:0;color:var(--anatomy-text)}
+.iso-plate-corner[data-corner="title"]{top:0;right:0;text-transform:uppercase;letter-spacing:.1em}
+.iso-plate-corner[data-corner="hint"]{bottom:0;left:0;text-transform:uppercase;letter-spacing:.1em}
+.iso-plate-corner[data-corner="readout"]{right:0;bottom:0;color:var(--anatomy-text);font-variant-numeric:tabular-nums}
+.iso-plate .iso-svg{margin:0 auto}
+.iso-legend{display:grid;gap:8px;margin-top:12px;color:var(--anatomy-muted);font-size:13px;line-height:1.55}
+.iso-keys{display:flex;flex-wrap:wrap;gap:6px 18px}
+.iso-key{display:inline-flex;align-items:center;gap:7px}
+.iso-swatch{width:16px;height:10px;flex:none;overflow:visible}
+.iso-swatch path{fill:none;stroke:var(--anatomy-hi);stroke-width:1;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.iso-swatch[data-mark="raised"] path,.iso-swatch[data-mark="flat"] path{stroke:var(--anatomy-mid)}
+.iso-swatch[data-mark="lit"] path{stroke:var(--anatomy-lit)}
+.iso-swatch[data-mark="dim"] path{stroke:var(--anatomy-lo)}
+.iso-swatch[data-mark="dotted"] path{stroke-dasharray:.01 3;stroke-width:1.4}
+.iso-swatch[data-mark="dashed"] path{stroke-dasharray:3 2.5}
+.iso-swatch[data-mark="red"] path{stroke:var(--anatomy-red)}
+.iso-swatch[data-mark="green"] path{stroke:var(--anatomy-green)}
+.iso-swatch[data-mark="blue"] path{stroke:var(--anatomy-blue)}
+.iso-swatch-crease{stroke:var(--anatomy-lo)!important}
+@media (max-width:560px){.iso-plate{padding:48px 12px 70px}.iso-plate-corner[data-corner="hint"]{bottom:18px}}
+@media (prefers-reduced-motion:reduce){.iso-line[data-flow],.iso-dots circle[data-pulse]{animation:none}}
+
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body[data-theme="light"]{color-scheme:light}
+body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.iso-page{width:min(680px,100% - 32px);margin:64px auto 96px}
+</style></head><body class="iso" data-theme="light"><script>(()=>{const mq=matchMedia("(prefers-color-scheme: dark)");const set=()=>{document.body.dataset.theme=mq.matches?"dark":"light";document.documentElement.style.colorScheme=mq.matches?"dark":"light";};set();mq.addEventListener("change",set);})()</script><main class="iso-page"><style>.iso{
+  --ct-bore:#060606;--ct-face:#1d1d20;--ct-tube:#d7d7dc;--ct-beam:#ffd36b;--ct-cell:#ffe08a;
+  --ct-patient:#6b5649;--ct-led:#3a3a3e;--ct-led-on:#ff6b5b;--ct-canvas:#0d0d0e;
+}
+.iso[data-theme="light"]{
+  --ct-bore:#2b2b2f;--ct-face:#fbfbf9;--ct-tube:#ffffff;--ct-beam:#f0a92a;--ct-cell:#f5b22e;
+  --ct-patient:#e6c5ad;--ct-led:#cfcfd2;--ct-led-on:#e5484d;--ct-canvas:#ececea;
+}
+.ct-bore{fill:var(--ct-bore)}
+.ct-face{fill:var(--ct-face);fill-rule:evenodd}
+.ct-beam{fill:var(--ct-beam);fill-opacity:.42;stroke:none}
+.ct-tube{fill:var(--ct-tube);stroke:var(--anatomy-hi);stroke-width:.5}
+.ct-cell{fill:var(--ct-cell);stroke:var(--anatomy-lo);stroke-width:.35;transition:opacity .08s linear}
+.ct-patient{fill:var(--ct-patient)}
+.ct-led{fill:var(--ct-led);transition:fill .2s}
+.ct-led[data-on]{fill:var(--ct-led-on)}
+.ct-stage{outline:none}
+.ct-stage:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:6px}
+
+.ct-controls{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin:28px 0 18px}
+.ct-play,.ct-step{font:11px/1 var(--anatomy-mono);letter-spacing:.04em;color:var(--anatomy-muted);background:transparent;border:0;box-shadow:0 0 0 1px var(--anatomy-faint);padding:8px 10px 7px;cursor:pointer;display:inline-flex;gap:6px;align-items:center;transition:color .2s,box-shadow .2s}
+.ct-play:hover,.ct-step:hover{color:var(--anatomy-text);box-shadow:0 0 0 1px var(--anatomy-mid)}
+.ct-play:focus-visible,.ct-step:focus-visible,.ct-scrub input:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:2px}
+.ct-step span{color:var(--anatomy-lo)}
+.ct-step[aria-pressed="true"]{color:var(--anatomy-strong);box-shadow:0 0 0 1px var(--anatomy-hi)}
+.ct-step[aria-pressed="true"] span{color:var(--anatomy-mid)}
+.ct-play{color:var(--anatomy-strong)}
+.ct-steps{display:flex;flex-wrap:wrap;gap:6px}
+.ct-scrub{display:flex;align-items:center;gap:10px;flex:1 1 200px;min-width:0;font:11px var(--anatomy-mono);color:var(--anatomy-muted)}
+.ct-scrub input{flex:1;min-width:0;accent-color:var(--anatomy-hi)}
+
+.ct-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.ct-card{margin:0;background:var(--anatomy-card);box-shadow:0 0 0 1px var(--anatomy-faint);padding:14px;display:grid;gap:10px;align-content:start;min-width:0}
+.ct-card figcaption{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted)}
+.ct-profile{display:block;width:100%;height:110px;background:var(--ct-canvas)}
+.ct-profile polyline{fill:none;stroke:var(--anatomy-hi);stroke-width:1;vector-effect:non-scaling-stroke}
+.ct-sino{display:block;width:100%;height:auto;aspect-ratio:96/180;image-rendering:pixelated;background:var(--ct-canvas)}
+.ct-recon-wrap{position:relative;width:100%;max-width:300px;aspect-ratio:1;justify-self:center;cursor:crosshair}
+.ct-recon{display:block;width:100%;height:100%;image-rendering:pixelated;background:var(--ct-canvas)}
+.ct-probe{position:absolute;width:12px;height:12px;margin:-6px 0 0 -6px;border:1.5px solid var(--ct-led-on);border-radius:50%;pointer-events:none;box-shadow:0 0 0 1px #00000040}
+.ct-probe[hidden]{display:none}
+.ct-hu{margin:0;min-height:2.6em;font:12px/1.5 var(--anatomy-mono);color:var(--anatomy-text)}
+.ct-note{margin:0;font-size:12px;line-height:1.5;color:var(--anatomy-muted)}
+
+.ct-scale{list-style:none;display:flex;flex-wrap:wrap;gap:8px 20px;padding:0;margin:20px 0 0;font:12px var(--anatomy-mono);color:var(--anatomy-text)}
+.ct-scale li{display:flex;align-items:center;gap:8px}
+.ct-scale b{font-weight:500;color:var(--anatomy-strong)}
+.ct-swatch{display:inline-block;width:14px;height:14px;box-shadow:0 0 0 1px var(--anatomy-faint)}
+.ct-swatch[data-v="air"]{background:#000}
+.ct-swatch[data-v="fat"]{background:#262626}
+.ct-swatch[data-v="soft"]{background:#808080}
+.ct-swatch[data-v="bone"]{background:#ffffff}
+
+@media (prefers-reduced-motion:reduce){.ct-cell,.ct-led{transition:none}}
+@media (max-width:560px){.iso-plate{overflow:hidden}}
+</style><figure class="iso-figure"><div class="iso-plate"><div class="iso-plate-corners" aria-hidden="true"><span class="iso-plate-corner" data-corner="fig">Fig 1</span><span class="iso-plate-corner" data-corner="title">CT scanner</span><span class="iso-plate-corner" data-corner="hint">Space pauses · scrub the slice to read HU</span><span class="iso-plate-corner" data-corner="readout" data-readout></span></div><div class="ct-stage" tabindex="0" role="group" aria-label="CT scanner animation"><svg xmlns="http://www.w3.org/2000/svg" class="iso-svg" viewBox="0 0 640 500" role="img" aria-label="A CT scanner cut away at the front: a gantry with a bore, a rotor carrying an X-ray tube and a detector arc, and a table that slides the patient through the bore."><g class="iso-solid"><path class="iso-fill" d="M32.6 250.5L32.9 249.6L33.7 248.7L34.9 247.9L163.7 175.6L165.2 174.9L167 174.4L169 174L171.1 173.8L173.3 173.8L175.5 173.9L177.5 174.3L179.4 174.8L603.2 319.9L604.8 320.6L606 321.4L606.9 322.3L607.4 323.2L607.4 324.2L607.4 341L607.1 341.9L606.3 342.8L605.1 343.6L476.3 415.9L474.8 416.6L473 417.1L471 417.5L468.9 417.7L466.7 417.7L464.5 417.6L462.5 417.2L460.6 416.7L36.8 271.6L35.2 270.9L34 270.1L33.1 269.2L32.6 268.3L32.6 267.3Z"/><path class="iso-shade" data-shade="0" d="M607.4 341L607.1 341.9L607.1 325.1L607.4 324.2ZM607.1 341.9L606.3 342.8L606.3 326L607.1 325.1ZM606.3 342.8L605.1 343.6L605.1 326.8L606.3 326ZM605.1 343.6L476.3 415.9L476.3 399.1L605.1 326.8ZM476.3 415.9L474.8 416.6L474.8 399.8L476.3 399.1ZM474.8 416.6L473 417.1L473 400.3L474.8 399.8Z"/><path class="iso-shade" data-shade="1" d="M473 417.1L471 417.5L471 400.7L473 400.3ZM471 417.5L468.9 417.7L468.9 400.9L471 400.7ZM468.9 417.7L466.7 417.7L466.7 401L468.9 400.9Z"/><path class="iso-shade" data-shade="2" d="M466.7 417.7L464.5 417.6L464.5 400.8L466.7 401ZM464.5 417.6L462.5 417.2L462.5 400.4L464.5 400.8Z"/><path class="iso-shade" data-shade="3" d="M462.5 417.2L460.6 416.7L460.6 399.9L462.5 400.4ZM460.6 416.7L36.8 271.6L36.8 254.8L460.6 399.9ZM36.8 271.6L35.2 270.9L35.2 254.1L36.8 254.8ZM35.2 270.9L34 270.1L34 253.3L35.2 254.1ZM34 270.1L33.1 269.2L33.1 252.4L34 253.3ZM33.1 269.2L32.6 268.3L32.6 251.5L33.1 252.4ZM32.6 268.3L32.6 267.3L32.6 250.5L32.6 251.5Z"/><path class="iso-top" d="M603.2 319.9L604.8 320.6L606 321.4L606.9 322.3L607.4 323.2L607.4 324.2L607.1 325.1L606.3 326L605.1 326.8L476.3 399.1L474.8 399.8L473 400.3L471 400.7L468.9 400.9L466.7 401L464.5 400.8L462.5 400.4L460.6 399.9L36.8 254.8L35.2 254.1L34 253.3L33.1 252.4L32.6 251.5L32.6 250.5L32.9 249.6L33.7 248.7L34.9 247.9L163.7 175.6L165.2 174.9L167 174.4L169 174L171.1 173.8L173.3 173.8L175.5 173.9L177.5 174.3L179.4 174.8Z"/><path class="iso-line iso-crease" data-tone="faint" d="M607.4 324.2L607.1 325.1L606.3 326L605.1 326.8L476.3 399.1L474.8 399.8L473 400.3L471 400.7L468.9 400.9L466.7 401L464.5 400.8L462.5 400.4L460.6 399.9L36.8 254.8L35.2 254.1L34 253.3L33.1 252.4L32.6 251.5L32.6 250.5"/><path class="iso-line iso-bevel" data-tone="faint" d="M607.4 324.2L604.2 324.8L603.6 325.4L602.7 326.1L474.1 398.2L472.9 398.8L471.6 399.2L470.1 399.5L468.5 399.6L466.9 399.6L465.3 399.5L463.8 399.3L462.3 398.9L38.8 253.8L37.5 253.3L36.6 252.7L35.9 252L35.6 251.4L32.6 250.5"/><path class="iso-line" data-tone="faint" d="M607.4 334.2L607.1 335.2L606.3 336.1L605.1 336.9L476.3 409.1L474.8 409.8L473 410.4L471 410.8L468.9 411L466.7 411L464.5 410.9L462.5 410.5L460.6 410L36.8 264.9L35.2 264.2L34 263.4L33.1 262.5L32.6 261.6L32.6 260.6"/><path class="iso-line iso-edge" data-tone="mid" d="M32.6 250.5L32.9 249.6L33.7 248.7L34.9 247.9L163.7 175.6L165.2 174.9L167 174.4L169 174L171.1 173.8L173.3 173.8L175.5 173.9L177.5 174.3L179.4 174.8L603.2 319.9L604.8 320.6L606 321.4L606.9 322.3L607.4 323.2L607.4 324.2M607.4 341L607.1 341.9L606.3 342.8L605.1 343.6L476.3 415.9L474.8 416.6L473 417.1L471 417.5L468.9 417.7L466.7 417.7L464.5 417.6L462.5 417.2L460.6 416.7L36.8 271.6L35.2 270.9L34 270.1L33.1 269.2L32.6 268.3L32.6 267.3M607.4 324.2L607.4 341M32.6 250.5L32.6 267.3"/></g><path class="iso-line" data-tone="lo" d="M596.3 323.8L467.5 396.1L43.7 250.9L172.5 178.7Z"/><g class="iso-dots" data-tone="mid"><circle cx="173.8" cy="183.3" r="0.5"/><circle cx="585.8" cy="324.4" r="0.5"/><circle cx="54.2" cy="250.3" r="0.5"/><circle cx="466.2" cy="391.5" r="0.5"/></g><g class="iso-solid"><path class="iso-fill" d="M481.6 318.1L481.7 317.8L482 317.4L500 307.4L500.6 307.1L501.5 307L502.3 307L503.1 307.2L584.9 335.2L585.5 335.5L585.8 335.9L585.8 337.2L585.7 337.6L585.3 337.9L567.4 348L566.7 348.2L565.9 348.4L565 348.3L564.2 348.2L482.4 320.1L481.9 319.8L481.6 319.5Z"/><path class="iso-shade" data-shade="0" d="M585.8 337.2L585.7 337.6L585.7 336.2L585.8 335.9ZM585.7 337.6L585.3 337.9L585.3 336.6L585.7 336.2ZM585.3 337.9L567.4 348L567.4 346.6L585.3 336.6ZM567.4 348L566.7 348.2L566.7 346.9L567.4 346.6Z"/><path class="iso-shade" data-shade="1" d="M566.7 348.2L565.9 348.4L565.9 347L566.7 346.9Z"/><path class="iso-shade" data-shade="2" d="M565.9 348.4L565 348.3L565 347L565.9 347ZM565 348.3L564.2 348.2L564.2 346.8L565 347Z"/><path class="iso-shade" data-shade="3" d="M564.2 348.2L482.4 320.1L482.4 318.8L564.2 346.8ZM482.4 320.1L481.9 319.8L481.9 318.5L482.4 318.8ZM481.9 319.8L481.6 319.5L481.6 318.1L481.9 318.5Z"/><path class="iso-top" d="M584.9 335.2L585.5 335.5L585.8 335.9L585.7 336.2L585.3 336.6L567.4 346.6L566.7 346.9L565.9 347L565 347L564.2 346.8L482.4 318.8L481.9 318.5L481.6 318.1L481.7 317.8L482 317.4L500 307.4L500.6 307.1L501.5 307L502.3 307L503.1 307.2Z"/><path class="iso-line iso-crease" data-tone="faint" d="M585.8 335.9L585.7 336.2L585.3 336.6L567.4 346.6L566.7 346.9L565.9 347L565 347L564.2 346.8L482.4 318.8L481.9 318.5L481.6 318.1"/><path class="iso-line iso-edge" data-tone="lo" d="M481.6 318.1L481.7 317.8L482 317.4L500 307.4L500.6 307.1L501.5 307L502.3 307L503.1 307.2L584.9 335.2L585.5 335.5L585.8 335.9M585.8 337.2L585.7 337.6L585.3 337.9L567.4 348L566.7 348.2L565.9 348.4L565 348.3L564.2 348.2L482.4 320.1L481.9 319.8L481.6 319.5M585.8 335.9L585.8 337.2M481.6 318.1L481.6 319.5"/></g><path class="iso-line" data-tone="faint" d="M582.5 336L565.5 345.6L484.9 318L501.9 308.4Z"/><g class="iso-solid"><path class="iso-fill" d="M229.7 207.8L229.7 205.3L229.8 202.8L229.8 200.2L230 197.7L230.1 195.1L230.3 192.5L230.5 189.9L230.8 187.3L231 184.6L231.4 182L231.7 179.3L232.1 176.7L232.5 174L233 171.4L233.4 168.7L234 166L234.5 163.3L235.1 160.6L235.7 158L236.3 155.3L237 152.6L237.7 149.9L238.4 147.2L239.2 144.6L240 141.9L240.8 139.2L241.7 136.6L242.6 134L243.5 131.3L244.4 128.7L245.4 126.1L246.4 123.5L247.4 120.9L248.4 118.3L249.5 115.8L250.6 113.2L251.7 110.7L252.9 108.2L254.1 105.7L255.3 103.3L256.5 100.8L257.7 98.4L259 96L260.3 93.6L261.6 91.3L263 89L264.3 86.7L265.7 84.4L267.1 82.2L268.5 80L270 77.8L271.4 75.7L272.9 73.5L274.4 71.5L275.9 69.4L277.4 67.4L278.9 65.4L280.5 63.5L282 61.6L283.6 59.7L285.2 57.9L286.8 56.1L288.4 54.3L290.1 52.6L291.7 51L293.3 49.3L295 47.8L296.7 46.2L298.3 44.7L300 43.3L301.7 41.8L303.4 40.5L305.1 39.2L306.8 37.9L308.5 36.7L310.2 35.5L311.9 34.4L313.6 33.3L315.3 32.2L317.1 31.2L318.8 30.3L320.5 29.4L322.2 28.6L323.9 27.8L325.6 27.1L327.3 26.4L329 25.7L330.7 25.1L332.4 24.6L334.1 24.1L335.8 23.7L337.5 23.3L339.1 23L340.8 22.7L342.4 22.5L344.1 22.3L345.7 22.2L347.3 22.2L348.9 22.1L350.5 22.2L352.1 22.3L353.6 22.4L355.2 22.6L356.7 22.9L358.2 23.2L359.7 23.6L361.2 24L362.7 24.4L456.9 56.7L458.3 57.2L459.8 57.8L461.2 58.4L462.6 59L464 59.8L465.3 60.5L466.7 61.4L468 62.2L469.3 63.1L470.5 64.1L471.8 65.1L473 66.2L474.2 67.3L475.4 68.5L476.5 69.7L477.7 70.9L478.8 72.2L479.8 73.6L480.9 75L481.9 76.4L482.9 77.9L483.9 79.4L484.8 81L485.7 82.6L486.6 84.3L487.5 86L488.3 87.7L489.1 89.5L489.8 91.3L490.6 93.1L491.3 95L492 96.9L492.6 98.9L493.2 100.9L493.8 102.9L494.3 105L494.8 107.1L495.3 109.2L495.8 111.4L496.2 113.6L496.6 115.8L496.9 118.1L497.2 120.4L497.5 122.7L497.8 125L498 127.4L498.2 129.8L498.3 132.2L498.5 134.6L498.5 137.1L498.6 139.5L498.6 142L498.6 144.5L498.5 147.1L498.5 149.6L498.3 152.2L498.2 154.8L498 157.4L497.8 160L497.5 162.6L497.2 165.2L496.9 167.9L496.6 170.5L496.2 173.2L495.8 175.8L495.3 178.5L494.8 181.2L494.3 183.8L493.8 186.5L493.2 189.2L492.6 191.9L492 194.6L491.3 197.3L490.6 199.9L489.8 202.6L489.1 205.3L488.3 207.9L487.5 210.6L486.6 213.3L485.7 215.9L484.8 218.5L483.9 221.2L482.9 223.8L481.9 226.4L480.9 229L479.8 231.5L478.8 234.1L477.7 236.6L476.5 239.1L475.4 241.6L474.2 244.1L473 246.6L471.8 249L470.5 251.4L469.3 253.8L468 256.2L466.7 258.6L465.3 260.9L464 263.2L462.6 265.4L461.2 267.7L459.8 269.9L458.3 272L456.9 274.2L455.4 276.3L453.9 278.4L452.4 280.4L450.9 282.4L449.4 284.4L447.8 286.4L446.2 288.3L444.7 290.1L443.1 292L441.5 293.8L439.9 295.5L438.2 297.2L436.6 298.9L434.9 300.5L433.3 302.1L431.6 303.6L430 305.1L428.3 306.6L426.6 308L424.9 309.4L423.2 310.7L421.5 312L419.8 313.2L418.1 314.4L416.4 315.5L414.7 316.6L412.9 317.6L411.2 318.6L409.5 319.5L407.8 320.4L406.1 321.3L404.4 322.1L402.7 322.8L401 323.5L399.3 324.1L397.6 324.7L395.9 325.2L394.2 325.7L392.5 326.1L390.8 326.5L389.2 326.9L387.5 327.1L385.9 327.3L384.2 327.5L382.6 327.6L381 327.7L379.4 327.7L377.8 327.7L376.2 327.6L374.7 327.4L373.1 327.2L371.6 327L370 326.7L368.5 326.3L367.1 325.9L365.6 325.4L271.4 293.2L270 292.7L268.5 292.1L267.1 291.5L265.7 290.8L264.3 290.1L263 289.3L261.6 288.5L260.3 287.6L259 286.7L257.7 285.7L256.5 284.7L255.3 283.7L254.1 282.5L252.9 281.4L251.7 280.2L250.6 278.9L249.5 277.6L248.4 276.3L247.4 274.9L246.4 273.4L245.4 272L244.4 270.4L243.5 268.9L242.6 267.2L241.7 265.6L240.8 263.9L240 262.2L239.2 260.4L238.4 258.6L237.7 256.7L237 254.8L236.3 252.9L235.7 250.9L235.1 248.9L234.5 246.9L234 244.8L233.4 242.7L233 240.6L232.5 238.4L232.1 236.2L231.7 234L231.4 231.8L231 229.5L230.8 227.2L230.5 224.8L230.3 222.5L230.1 220.1L230 217.7L229.8 215.2L229.8 212.8L229.7 210.3Z"/><path class="iso-shade" data-shade="0" d="M271.4 293.2L268.5 292.1L265.7 290.8L263 289.3L260.3 287.6L257.7 285.7L255.3 283.7L252.9 281.4L250.6 278.9L248.4 276.3L246.4 273.4L244.4 270.4L242.6 267.2L240.8 263.9L239.2 260.4L333.4 292.6L335 296.2L336.7 299.5L338.6 302.7L340.5 305.7L342.6 308.5L344.8 311.2L347.1 313.6L349.4 315.9L351.9 318L354.5 319.9L357.1 321.6L359.9 323.1L362.7 324.3L365.6 325.4ZM323.9 240.1L323.9 235L324.1 229.9L324.5 224.7L324.9 219.5L325.5 214.2L326.3 208.9L327.1 203.6L328.1 198.3L329.3 192.9L330.5 187.5L331.9 182.2L333.4 176.8L335 171.5L336.7 166.2L338.6 160.9L340.5 155.7L342.6 150.6L344.8 145.5L347.1 140.5L349.4 135.5L351.9 130.7L354.5 125.9L357.1 121.2L359.9 116.7L362.7 112.2L365.6 107.9L368.5 103.7L371.6 99.7L374.7 95.7L377.8 92L381 88.3L384.2 84.9L387.5 81.6L390.8 78.5L394.2 75.5L397.6 72.7L401 70.1L404.4 67.7L407.8 65.5L411.2 63.5L414.7 61.7L418.1 60L421.5 58.6L424.9 57.4L428.3 56.4L431.6 55.6L434.9 55L438.2 54.6L441.5 54.4L444.7 54.4L447.8 54.7L450.9 55.1L453.9 55.8L456.9 56.7L459.8 57.8L462.6 59L465.3 60.5L468 62.2L470.5 64.1L473 66.2L475.4 68.5L477.7 70.9L479.8 73.6L481.9 76.4L483.9 79.4L485.7 82.6L487.5 86L489.1 89.5L490.6 93.1L492 96.9L493.2 100.9L494.3 105L495.3 109.2L496.2 113.6L496.9 118.1L497.5 122.7L498 127.4L498.3 132.2L498.5 137.1L498.6 142L498.5 147.1L498.3 152.2L498 157.4L497.5 162.6L496.9 167.9L496.2 173.2L495.3 178.5L494.3 183.8L493.2 189.2L492 194.6L490.6 199.9L489.1 205.3L487.5 210.6L485.7 215.9L483.9 221.2L481.9 226.4L479.8 231.5L477.7 236.6L475.4 241.6L473 246.6L470.5 251.4L468 256.2L465.3 260.9L462.6 265.4L459.8 269.9L456.9 274.2L453.9 278.4L450.9 282.4L447.8 286.4L444.7 290.1L441.5 293.8L438.2 297.2L434.9 300.5L431.6 303.6L428.3 306.6L424.9 309.4L421.5 312L418.1 314.4L414.7 316.6L411.2 318.6L407.8 320.4L404.4 322.1L401 323.5L397.6 324.7L394.2 325.7L390.8 326.5L387.5 327.1L384.2 327.5L381 327.7L377.8 327.7L374.7 327.4L371.6 327L368.5 326.3L365.6 325.4L362.7 324.3L359.9 323.1L357.1 321.6L354.5 319.9L351.9 318L349.4 315.9L347.1 313.6L344.8 311.2L342.6 308.5L340.5 305.7L338.6 302.7L336.7 299.5L335 296.2L333.4 292.6L331.9 289L330.5 285.2L329.3 281.2L328.1 277.1L327.1 272.9L326.3 268.5L325.5 264L324.9 259.4L324.5 254.7L324.1 249.9L323.9 245L323.9 240.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1L411.2 191.1Z"/><path class="iso-shade" data-shade="1" d="M239.2 260.4L237.7 256.7L236.3 252.9L235.1 248.9L234 244.8L233 240.6L232.1 236.2L326.3 268.5L327.1 272.9L328.1 277.1L329.3 281.2L330.5 285.2L331.9 289L333.4 292.6Z"/><path class="iso-shade" data-shade="2" d="M232.1 236.2L231.4 231.8L230.8 227.2L230.3 222.5L230 217.7L229.8 212.8L229.7 207.8L229.8 202.8L323.9 235L323.9 240.1L323.9 245L324.1 249.9L324.5 254.7L324.9 259.4L325.5 264L326.3 268.5Z"/><path class="iso-shade" data-shade="3" d="M229.8 202.8L230 197.7L230.3 192.5L230.8 187.3L231.4 182L232.1 176.7L233 171.4L234 166L328.1 198.3L327.1 203.6L326.3 208.9L325.5 214.2L324.9 219.5L324.5 224.7L324.1 229.9L323.9 235ZM344.1 22.3L347.3 22.2L350.5 22.2L353.6 22.4L356.7 22.9L359.7 23.6L362.7 24.4L456.9 56.7L453.9 55.8L450.9 55.1L447.8 54.7L444.7 54.4L441.5 54.4L438.2 54.6Z"/><path class="iso-top" d="M234 166L235.1 160.6L236.3 155.3L237.7 149.9L239.2 144.6L240.8 139.2L242.6 134L244.4 128.7L246.4 123.5L248.4 118.3L250.6 113.2L252.9 108.2L255.3 103.3L257.7 98.4L260.3 93.6L263 89L265.7 84.4L268.5 80L271.4 75.7L274.4 71.5L277.4 67.4L280.5 63.5L283.6 59.7L286.8 56.1L290.1 52.6L293.3 49.3L296.7 46.2L300 43.3L303.4 40.5L306.8 37.9L310.2 35.5L313.6 33.3L317.1 31.2L320.5 29.4L323.9 27.8L327.3 26.4L330.7 25.1L334.1 24.1L337.5 23.3L340.8 22.7L344.1 22.3L438.2 54.6L434.9 55L431.6 55.6L428.3 56.4L424.9 57.4L421.5 58.6L418.1 60L414.7 61.7L411.2 63.5L407.8 65.5L404.4 67.7L401 70.1L397.6 72.7L394.2 75.5L390.8 78.5L387.5 81.6L384.2 84.9L381 88.3L377.8 92L374.7 95.7L371.6 99.7L368.5 103.7L365.6 107.9L362.7 112.2L359.9 116.7L357.1 121.2L354.5 125.9L351.9 130.7L349.4 135.5L347.1 140.5L344.8 145.5L342.6 150.6L340.5 155.7L338.6 160.9L336.7 166.2L335 171.5L333.4 176.8L331.9 182.2L330.5 187.5L329.3 192.9L328.1 198.3Z"/><path class="iso-line iso-crease" data-tone="faint" d="M365.2 325.3L364.5 325L363.7 324.7L362.9 324.4L362.2 324.1L361.4 323.8L360.6 323.4L359.9 323.1L359.2 322.7L358.4 322.3L357.7 321.9L357 321.5L356.2 321L355.5 320.6L354.8 320.1L354.1 319.6L353.4 319.1L352.7 318.6L352.1 318.1L351.4 317.6L350.7 317L350.1 316.4L349.4 315.9L348.8 315.3L348.1 314.7L347.5 314L346.9 313.4L346.2 312.8L345.6 312.1L345 311.4L344.4 310.7L343.8 310L343.2 309.3L342.7 308.6L342.1 307.9L341.5 307.1L341 306.3L340.5 305.6L339.9 304.8L339.4 304L338.9 303.1L338.4 302.3L337.9 301.5L337.4 300.6L336.9 299.7L336.4 298.9L335.9 298L335.5 297.1L335 296.2L334.6 295.2L334.1 294.3L333.7 293.3L333.3 292.4L332.9 291.4L332.5 290.4L332.1 289.4L331.7 288.4L331.3 287.4L330.9 286.4L330.6 285.3L330.2 284.3L329.9 283.2L329.6 282.2L329.2 281.1L328.9 280L328.6 278.9L328.3 277.8L328 276.7L327.8 275.5L327.5 274.4L327.2 273.3L327 272.1L326.7 270.9L326.5 269.8L326.3 268.6L326.1 267.4L325.9 266.2L325.7 265L325.5 263.8L325.3 262.6L325.2 261.3L325 260.1L324.9 258.8L324.7 257.6L324.6 256.3L324.5 255.1L324.4 253.8L324.3 252.5L324.2 251.2L324.1 249.9L324.1 248.6L324 247.3L324 246L323.9 244.7L323.9 243.3L323.9 242L323.9 240.7L323.9 239.3L323.9 238L323.9 236.6L323.9 235.2L324 233.9L324 232.5L324.1 231.1L324.1 229.7L324.2 228.4L324.3 227L324.4 225.6L324.5 224.2L324.6 222.8L324.8 221.4L324.9 220L325 218.6L325.2 217.2L325.4 215.7L325.5 214.3L325.7 212.9L325.9 211.5L326.1 210.1L326.3 208.6L326.5 207.2L326.8 205.8L327 204.3L327.3 202.9L327.5 201.5L327.8 200L328.1 198.6L328.4 197.1L328.7 195.7L329 194.3L329.3 192.8L329.6 191.4L329.9 189.9L330.3 188.5L330.6 187.1L331 185.6L331.4 184.2L331.7 182.7L332.1 181.3L332.5 179.9L332.9 178.4L333.3 177L333.7 175.6L334.2 174.1L334.6 172.7L335.1 171.3L335.5 169.9L336 168.4L336.5 167L336.9 165.6L337.4 164.2L337.9 162.8L338.4 161.4L338.9 160L339.5 158.6L340 157.2L340.5 155.8L341.1 154.4L341.6 153L342.2 151.6L342.8 150.2L343.3 148.9L343.9 147.5L344.5 146.1L345.1 144.8L345.7 143.4L346.3 142.1L346.9 140.7L347.6 139.4L348.2 138.1L348.8 136.7L349.5 135.4L350.2 134.1L350.8 132.8L351.5 131.5L352.2 130.2L352.8 128.9L353.5 127.6L354.2 126.4L354.9 125.1L355.6 123.9L356.3 122.6L357.1 121.4L357.8 120.1L358.5 118.9L359.3 117.7L360 116.5L360.8 115.3L361.5 114.1L362.3 112.9L363 111.7L363.8 110.5L364.6 109.4L365.4 108.2L366.1 107.1L366.9 106L367.7 104.8L368.5 103.7L369.3 102.6L370.2 101.5L371 100.4L371.8 99.4L372.6 98.3L373.4 97.2L374.3 96.2L375.1 95.2L376 94.2L376.8 93.1L377.6 92.1L378.5 91.2L379.4 90.2L380.2 89.2L381.1 88.3L381.9 87.3L382.8 86.4L383.7 85.5L384.6 84.6L385.4 83.7L386.3 82.8L387.2 81.9L388.1 81L389 80.2L389.9 79.4L390.8 78.5L391.7 77.7L392.6 76.9L393.5 76.1L394.4 75.4L395.3 74.6L396.2 73.9L397.1 73.1L398 72.4L398.9 71.7L399.8 71L400.7 70.3L401.6 69.6L402.6 69L403.5 68.4L404.4 67.7L405.3 67.1L406.2 66.5L407.2 65.9L408.1 65.4L409 64.8L409.9 64.2L410.8 63.7L411.8 63.2L412.7 62.7L413.6 62.2L414.5 61.7L415.4 61.3L416.4 60.8L417.3 60.4L418.2 60L419.1 59.6L420 59.2L420.9 58.8L421.9 58.5L422.8 58.1L423.7 57.8L424.6 57.5L425.5 57.2L426.4 56.9L427.3 56.6L428.2 56.4L429.1 56.2L430 55.9L430.9 55.7L431.8 55.5L432.7 55.4L433.6 55.2L434.5 55L435.4 54.9L436.3 54.8L437.2 54.7L438 54.6L438.9 54.5L439.8 54.5L440.6 54.4L441.5 54.4L442.4 54.4L443.2 54.4L444.1 54.4L444.9 54.5L445.8 54.5L446.6 54.6L447.5 54.7L448.3 54.7L449.1 54.9L450 55L450.8 55.1L451.6 55.3L452.4 55.5L453.2 55.6L454 55.8L454.8 56.1L455.6 56.3L456.4 56.5L457.2 56.8"/><path class="iso-line iso-edge" data-tone="mid" d="M229.7 207.8L229.7 205.3L229.8 202.8L229.8 200.2L230 197.7L230.1 195.1L230.3 192.5L230.5 189.9L230.8 187.3L231 184.6L231.4 182L231.7 179.3L232.1 176.7L232.5 174L233 171.4L233.4 168.7L234 166L234.5 163.3L235.1 160.6L235.7 158L236.3 155.3L237 152.6L237.7 149.9L238.4 147.2L239.2 144.6L240 141.9L240.8 139.2L241.7 136.6L242.6 134L243.5 131.3L244.4 128.7L245.4 126.1L246.4 123.5L247.4 120.9L248.4 118.3L249.5 115.8L250.6 113.2L251.7 110.7L252.9 108.2L254.1 105.7L255.3 103.3L256.5 100.8L257.7 98.4L259 96L260.3 93.6L261.6 91.3L263 89L264.3 86.7L265.7 84.4L267.1 82.2L268.5 80L270 77.8L271.4 75.7L272.9 73.5L274.4 71.5L275.9 69.4L277.4 67.4L278.9 65.4L280.5 63.5L282 61.6L283.6 59.7L285.2 57.9L286.8 56.1L288.4 54.3L290.1 52.6L291.7 51L293.3 49.3L295 47.8L296.7 46.2L298.3 44.7L300 43.3L301.7 41.8L303.4 40.5L305.1 39.2L306.8 37.9L308.5 36.7L310.2 35.5L311.9 34.4L313.6 33.3L315.3 32.2L317.1 31.2L318.8 30.3L320.5 29.4L322.2 28.6L323.9 27.8L325.6 27.1L327.3 26.4L329 25.7L330.7 25.1L332.4 24.6L334.1 24.1L335.8 23.7L337.5 23.3L339.1 23L340.8 22.7L342.4 22.5L344.1 22.3L345.7 22.2L347.3 22.2L348.9 22.1L350.5 22.2L352.1 22.3L353.6 22.4L355.2 22.6L356.7 22.9L358.2 23.2L359.7 23.6L361.2 24L362.7 24.4L456.9 56.7L458.3 57.2L459.8 57.8L461.2 58.4L462.6 59L464 59.8L465.3 60.5L466.7 61.4L468 62.2L469.3 63.1L470.5 64.1L471.8 65.1L473 66.2L474.2 67.3L475.4 68.5L476.5 69.7L477.7 70.9L478.8 72.2L479.8 73.6L480.9 75L481.9 76.4L482.9 77.9L483.9 79.4L484.8 81L485.7 82.6L486.6 84.3L487.5 86L488.3 87.7L489.1 89.5L489.8 91.3L490.6 93.1L491.3 95L492 96.9L492.6 98.9L493.2 100.9L493.8 102.9L494.3 105L494.8 107.1L495.3 109.2L495.8 111.4L496.2 113.6L496.6 115.8L496.9 118.1L497.2 120.4L497.5 122.7L497.8 125L498 127.4L498.2 129.8L498.3 132.2L498.5 134.6L498.5 137.1L498.6 139.5L498.6 142L498.6 144.5L498.5 147.1L498.5 149.6L498.3 152.2L498.2 154.8L498 157.4L497.8 160L497.5 162.6L497.2 165.2L496.9 167.9L496.6 170.5L496.2 173.2L495.8 175.8L495.3 178.5L494.8 181.2L494.3 183.8L493.8 186.5L493.2 189.2L492.6 191.9L492 194.6L491.3 197.3L490.6 199.9L489.8 202.6L489.1 205.3L488.3 207.9L487.5 210.6L486.6 213.3L485.7 215.9L484.8 218.5L483.9 221.2L482.9 223.8L481.9 226.4L480.9 229L479.8 231.5L478.8 234.1L477.7 236.6L476.5 239.1L475.4 241.6L474.2 244.1L473 246.6L471.8 249L470.5 251.4L469.3 253.8L468 256.2L466.7 258.6L465.3 260.9L464 263.2L462.6 265.4L461.2 267.7L459.8 269.9L458.3 272L456.9 274.2L455.4 276.3L453.9 278.4L452.4 280.4L450.9 282.4L449.4 284.4L447.8 286.4L446.2 288.3L444.7 290.1L443.1 292L441.5 293.8L439.9 295.5L438.2 297.2L436.6 298.9L434.9 300.5L433.3 302.1L431.6 303.6L430 305.1L428.3 306.6L426.6 308L424.9 309.4L423.2 310.7L421.5 312L419.8 313.2L418.1 314.4L416.4 315.5L414.7 316.6L412.9 317.6L411.2 318.6L409.5 319.5L407.8 320.4L406.1 321.3L404.4 322.1L402.7 322.8L401 323.5L399.3 324.1L397.6 324.7L395.9 325.2L394.2 325.7L392.5 326.1L390.8 326.5L389.2 326.9L387.5 327.1L385.9 327.3L384.2 327.5L382.6 327.6L381 327.7L379.4 327.7L377.8 327.7L376.2 327.6L374.7 327.4L373.1 327.2L371.6 327L370 326.7L368.5 326.3L367.1 325.9L365.6 325.4L271.4 293.2L270 292.7L268.5 292.1L267.1 291.5L265.7 290.8L264.3 290.1L263 289.3L261.6 288.5L260.3 287.6L259 286.7L257.7 285.7L256.5 284.7L255.3 283.7L254.1 282.5L252.9 281.4L251.7 280.2L250.6 278.9L249.5 277.6L248.4 276.3L247.4 274.9L246.4 273.4L245.4 272L244.4 270.4L243.5 268.9L242.6 267.2L241.7 265.6L240.8 263.9L240 262.2L239.2 260.4L238.4 258.6L237.7 256.7L237 254.8L236.3 252.9L235.7 250.9L235.1 248.9L234.5 246.9L234 244.8L233.4 242.7L233 240.6L232.5 238.4L232.1 236.2L231.7 234L231.4 231.8L231 229.5L230.8 227.2L230.5 224.8L230.3 222.5L230.1 220.1L230 217.7L229.8 215.2L229.8 212.8L229.7 210.3Z"/></g><path class="ct-bore" d="M264.2 188.5L264.4 181.6L265 174.6L266 167.5L267.4 160.3L269.1 153.1L271.3 145.9L273.7 138.8L276.5 131.9L279.7 125.2L283.1 118.7L286.7 112.6L290.6 106.8L294.7 101.4L299 96.4L303.4 91.9L307.9 87.9L312.4 84.5L317.1 81.6L321.7 79.3L326.2 77.6L330.7 76.5L335.1 76.1L339.4 76.3L343.5 77.1L347.4 78.5L351.1 80.6L354.5 83.2L357.6 86.4L360.4 90.2L362.9 94.5L365 99.3L366.8 104.5L368.1 110.2L369.1 116.2L369.7 122.5L369.9 129.1L369.7 136L369.1 143L368.1 150.1L366.8 157.3L365 164.5L362.9 171.7L360.4 178.8L357.6 185.7L354.5 192.4L351.1 198.9L347.4 205L343.5 210.8L339.4 216.2L335.1 221.2L330.7 225.7L326.2 229.7L321.7 233.1L317.1 236L312.4 238.3L307.9 240L303.4 241.1L299 241.5L294.7 241.3L290.6 240.5L286.7 239.1L283.1 237L279.7 234.4L276.5 231.2L273.7 227.4L271.3 223.1L269.1 218.3L267.4 213.1L266 207.4L265 201.4L264.4 195.1Z"/><path class="iso-line" data-tone="mid" d="M304.7 200.3L304.9 193.7L305.5 187L306.5 180.2L307.8 173.3L309.5 166.4L311.5 159.6L313.9 152.8L316.6 146.2L319.5 139.8L322.8 133.6L326.3 127.7L330 122.1L333.9 117L338 112.2L342.2 107.9L346.5 104.1L350.9 100.8L355.3 98.1L359.7 95.9L364.1 94.2L368.4 93.2L372.6 92.8L376.7 93L380.6 93.8L384.3 95.1L387.8 97.1L391.1 99.6L394.1 102.7L396.8 106.3L399.1 110.4L401.2 115L402.8 120L404.2 125.4L405.1 131.1L405.7 137.2L405.9 143.5L405.7 150.1L405.1 156.8L404.2 163.6L402.8 170.5L401.2 177.4L399.1 184.2L396.8 191L394.1 197.6L391.1 204L387.8 210.2L384.3 216.1L380.6 221.7L376.7 226.8L372.6 231.6L368.4 235.9L364.1 239.7L359.7 243L355.3 245.7L350.9 247.9L346.5 249.6L342.2 250.6L338 251L333.9 250.8L330 250L326.3 248.7L322.8 246.7L319.5 244.2L316.6 241.1L313.9 237.5L311.5 233.4L309.5 228.8L307.8 223.8L306.5 218.4L305.5 212.7L304.9 206.6ZM322.4 206.3L322.6 199.8L323.2 193.1L324.1 186.3L325.4 179.4L327.1 172.5L329.2 165.6L331.5 158.8L334.2 152.2L337.2 145.8L340.5 139.6L344 133.7L347.7 128.2L351.6 123L355.7 118.3L359.9 114L364.2 110.2L368.6 106.9L373 104.1L377.4 101.9L381.8 100.3L386.1 99.3L390.3 98.8L394.4 99L398.3 99.8L402 101.2L405.5 103.1L408.7 105.7L411.7 108.7L414.4 112.3L416.8 116.4L418.8 121L420.5 126L421.8 131.4L422.8 137.2L423.4 143.2L423.6 149.6L423.4 156.1L422.8 162.8L421.8 169.6L420.5 176.5L418.8 183.4L416.8 190.3L414.4 197.1L411.7 203.7L408.7 210.1L405.5 216.3L402 222.2L398.3 227.7L394.4 232.9L390.3 237.6L386.1 241.9L381.8 245.7L377.4 249L373 251.8L368.6 254L364.2 255.6L359.9 256.6L355.7 257L351.6 256.9L347.7 256.1L344 254.7L340.5 252.8L337.2 250.2L334.2 247.2L331.5 243.6L329.2 239.5L327.1 234.9L325.4 229.9L324.1 224.5L323.2 218.7L322.6 212.7Z"/><g class="iso-dots" data-tone="lo"><circle cx="304.7" cy="200.3" r="0.4"/><circle cx="306.5" cy="180.2" r="0.4"/><circle cx="311.5" cy="159.6" r="0.4"/><circle cx="319.5" cy="139.8" r="0.4"/><circle cx="330" cy="122.1" r="0.4"/><circle cx="342.2" cy="107.9" r="0.4"/><circle cx="355.3" cy="98.1" r="0.4"/><circle cx="368.4" cy="93.2" r="0.4"/><circle cx="380.6" cy="93.8" r="0.4"/><circle cx="391.1" cy="99.6" r="0.4"/><circle cx="399.1" cy="110.4" r="0.4"/><circle cx="404.2" cy="125.4" r="0.4"/><circle cx="405.9" cy="143.5" r="0.4"/><circle cx="404.2" cy="163.6" r="0.4"/><circle cx="399.1" cy="184.2" r="0.4"/><circle cx="391.1" cy="204" r="0.4"/><circle cx="380.6" cy="221.7" r="0.4"/><circle cx="368.4" cy="235.9" r="0.4"/><circle cx="355.3" cy="245.7" r="0.4"/><circle cx="342.2" cy="250.6" r="0.4"/><circle cx="330" cy="250" r="0.4"/><circle cx="319.5" cy="244.2" r="0.4"/><circle cx="311.5" cy="233.4" r="0.4"/><circle cx="306.5" cy="218.4" r="0.4"/></g><g data-pa><g data-tubes><path class="ct-beam" data-beam d=""/><path class="ct-tube" data-tube d=""/></g><g data-cells></g><g data-top transform="translate(0 0)"><g class="iso-solid"><path class="iso-fill" d="M268.7 205L268.8 204.5L269 204.1L269.5 203.8L329.3 170.2L330 169.9L330.8 169.7L331.8 169.6L332.8 169.6L333.7 169.7L334.5 169.9L434.6 204.2L435.3 204.5L435.8 204.9L436 205.3L436 212L436 212.4L435.7 212.8L435.2 213.2L375.5 246.8L374.8 247.1L373.9 247.3L373 247.4L372 247.4L371.1 247.3L370.2 247L270.2 212.8L269.5 212.5L269 212.1L268.7 211.7Z"/><path class="iso-shade" data-shade="0" d="M436 212L436 212.4L436 205.7L436 205.3ZM436 212.4L435.7 212.8L435.7 206.1L436 205.7ZM435.7 212.8L435.2 213.2L435.2 206.5L435.7 206.1ZM435.2 213.2L375.5 246.8L375.5 240L435.2 206.5ZM375.5 246.8L374.8 247.1L374.8 240.3L375.5 240Z"/><path class="iso-shade" data-shade="1" d="M374.8 247.1L373.9 247.3L373.9 240.6L374.8 240.3ZM373.9 247.3L373 247.4L373 240.7L373.9 240.6Z"/><path class="iso-shade" data-shade="2" d="M373 247.4L372 247.4L372 240.7L373 240.7ZM372 247.4L371.1 247.3L371.1 240.5L372 240.7Z"/><path class="iso-shade" data-shade="3" d="M371.1 247.3L370.2 247L370.2 240.3L371.1 240.5ZM370.2 247L270.2 212.8L270.2 206.1L370.2 240.3ZM270.2 212.8L269.5 212.5L269.5 205.8L270.2 206.1ZM269.5 212.5L269 212.1L269 205.4L269.5 205.8ZM269 212.1L268.7 211.7L268.7 205L269 205.4Z"/><path class="iso-top" d="M434.6 204.2L435.3 204.5L435.8 204.9L436 205.3L436 205.7L435.7 206.1L435.2 206.5L375.5 240L374.8 240.3L373.9 240.6L373 240.7L372 240.7L371.1 240.5L370.2 240.3L270.2 206.1L269.5 205.8L269 205.4L268.7 205L268.8 204.5L269 204.1L269.5 203.8L329.3 170.2L330 169.9L330.8 169.7L331.8 169.6L332.8 169.6L333.7 169.7L334.5 169.9Z"/><path class="iso-line iso-crease" data-tone="faint" d="M436 205.3L436 205.7L435.7 206.1L435.2 206.5L375.5 240L374.8 240.3L373.9 240.6L373 240.7L372 240.7L371.1 240.5L370.2 240.3L270.2 206.1L269.5 205.8L269 205.4L268.7 205"/><path class="iso-line iso-bevel" data-tone="faint" d="M436 205.3L434.5 205.6L434.4 205.9L434 206.1L374.3 239.6L373.9 239.8L373.4 239.9L372.8 240L372.2 240L371.6 239.9L371.1 239.8L271.1 205.6L270.7 205.4L270.4 205.1L268.7 205"/><path class="iso-line iso-edge" data-tone="mid" d="M268.7 205L268.8 204.5L269 204.1L269.5 203.8L329.3 170.2L330 169.9L330.8 169.7L331.8 169.6L332.8 169.6L333.7 169.7L334.5 169.9L434.6 204.2L435.3 204.5L435.8 204.9L436 205.3M436 212L436 212.4L435.7 212.8L435.2 213.2L375.5 246.8L374.8 247.1L373.9 247.3L373 247.4L372 247.4L371.1 247.3L370.2 247L270.2 212.8L269.5 212.5L269 212.1L268.7 211.7M436 205.3L436 212M268.7 205L268.7 211.7"/></g><path class="ct-patient" d="M302.1 180.5L302.5 174.9L303.6 169.1L305.3 163.1L307.8 157.2L310.8 151.4L314.3 145.9L318.3 140.9L322.6 136.4L327.1 132.6L331.8 129.6L336.4 127.4L340.9 126.1L345.2 125.8L349.2 126.4L414 148.5L417.5 150L420.5 152.4L422.9 155.6L424.7 159.6L425.8 164.2L426.2 169.4L425.8 174.9L424.7 180.8L422.9 186.7L420.5 192.7L417.5 198.5L414 203.9L410 209L405.7 213.4L401.2 217.2L396.5 220.3L391.9 222.4L387.4 223.7L383.1 224.1L379.1 223.5L314.3 201.3L310.8 199.8L307.8 197.4L305.3 194.2L303.6 190.2L302.5 185.6Z"/><path class="iso-line" data-tone="hi" d="M302.1 180.5L302.5 174.9L303.6 169.1L305.3 163.1L307.8 157.2L310.8 151.4L314.3 145.9L318.3 140.9L322.6 136.4L327.1 132.6L331.8 129.6L336.4 127.4L340.9 126.1L345.2 125.8L349.2 126.4L414 148.5L417.5 150L420.5 152.4L422.9 155.6L424.7 159.6L425.8 164.2L426.2 169.4L425.8 174.9L424.7 180.8L422.9 186.7L420.5 192.7L417.5 198.5L414 203.9L410 209L405.7 213.4L401.2 217.2L396.5 220.3L391.9 222.4L387.4 223.7L383.1 224.1L379.1 223.5L314.3 201.3L310.8 199.8L307.8 197.4L305.3 194.2L303.6 190.2L302.5 185.6Z"/></g></g><path class="ct-face" d="M229.7 207.8L230 196.5L231 184.9L232.7 173.1L235 161.2L237.9 149.3L241.4 137.5L245.5 125.8L250.1 114.4L255.3 103.3L260.9 92.6L266.9 82.4L273.4 72.8L280.1 63.9L287.2 55.7L294.4 48.3L301.9 41.7L309.4 36L317.1 31.2L324.7 27.5L332.2 24.7L339.7 22.9L346.9 22.2L354 22.5L360.7 23.8L367.2 26.2L373.2 29.6L378.8 33.9L384 39.3L388.6 45.5L392.7 52.6L396.2 60.5L399.2 69.1L401.5 78.4L403.1 88.4L404.1 98.8L404.4 109.8L404.1 121.1L403.1 132.7L401.5 144.5L399.2 156.4L396.2 168.3L392.7 180.1L388.6 191.8L384 203.2L378.8 214.3L373.2 225L367.2 235.2L360.7 244.8L354 253.7L346.9 261.9L339.7 269.3L332.2 275.9L324.7 281.6L317.1 286.4L309.4 290.1L301.9 292.9L294.4 294.7L287.2 295.4L280.1 295.1L273.4 293.8L266.9 291.4L260.9 288L255.3 283.7L250.1 278.3L245.5 272.1L241.4 265L237.9 257.1L235 248.5L232.7 239.2L231 229.2L230 218.8ZM264.2 188.5L264.4 181.6L265 174.6L266 167.5L267.4 160.3L269.1 153.1L271.3 145.9L273.7 138.8L276.5 131.9L279.7 125.2L283.1 118.7L286.7 112.6L290.6 106.8L294.7 101.4L299 96.4L303.4 91.9L307.9 87.9L312.4 84.5L317.1 81.6L321.7 79.3L326.2 77.6L330.7 76.5L335.1 76.1L339.4 76.3L343.5 77.1L347.4 78.5L351.1 80.6L354.5 83.2L357.6 86.4L360.4 90.2L362.9 94.5L365 99.3L366.8 104.5L368.1 110.2L369.1 116.2L369.7 122.5L369.9 129.1L369.7 136L369.1 143L368.1 150.1L366.8 157.3L365 164.5L362.9 171.7L360.4 178.8L357.6 185.7L354.5 192.4L351.1 198.9L347.4 205L343.5 210.8L339.4 216.2L335.1 221.2L330.7 225.7L326.2 229.7L321.7 233.1L317.1 236L312.4 238.3L307.9 240L303.4 241.1L299 241.5L294.7 241.3L290.6 240.5L286.7 239.1L283.1 237L279.7 234.4L276.5 231.2L273.7 227.4L271.3 223.1L269.1 218.3L267.4 213.1L266 207.4L265 201.4L264.4 195.1Z"/><path class="iso-line" data-tone="hi" d="M229.7 207.8L230 196.5L231 184.9L232.7 173.1L235 161.2L237.9 149.3L241.4 137.5L245.5 125.8L250.1 114.4L255.3 103.3L260.9 92.6L266.9 82.4L273.4 72.8L280.1 63.9L287.2 55.7L294.4 48.3L301.9 41.7L309.4 36L317.1 31.2L324.7 27.5L332.2 24.7L339.7 22.9L346.9 22.2L354 22.5L360.7 23.8L367.2 26.2L373.2 29.6L378.8 33.9L384 39.3L388.6 45.5L392.7 52.6L396.2 60.5L399.2 69.1L401.5 78.4L403.1 88.4L404.1 98.8L404.4 109.8L404.1 121.1L403.1 132.7L401.5 144.5L399.2 156.4L396.2 168.3L392.7 180.1L388.6 191.8L384 203.2L378.8 214.3L373.2 225L367.2 235.2L360.7 244.8L354 253.7L346.9 261.9L339.7 269.3L332.2 275.9L324.7 281.6L317.1 286.4L309.4 290.1L301.9 292.9L294.4 294.7L287.2 295.4L280.1 295.1L273.4 293.8L266.9 291.4L260.9 288L255.3 283.7L250.1 278.3L245.5 272.1L241.4 265L237.9 257.1L235 248.5L232.7 239.2L231 229.2L230 218.8ZM264.2 188.5L264.4 181.6L265 174.6L266 167.5L267.4 160.3L269.1 153.1L271.3 145.9L273.7 138.8L276.5 131.9L279.7 125.2L283.1 118.7L286.7 112.6L290.6 106.8L294.7 101.4L299 96.4L303.4 91.9L307.9 87.9L312.4 84.5L317.1 81.6L321.7 79.3L326.2 77.6L330.7 76.5L335.1 76.1L339.4 76.3L343.5 77.1L347.4 78.5L351.1 80.6L354.5 83.2L357.6 86.4L360.4 90.2L362.9 94.5L365 99.3L366.8 104.5L368.1 110.2L369.1 116.2L369.7 122.5L369.9 129.1L369.7 136L369.1 143L368.1 150.1L366.8 157.3L365 164.5L362.9 171.7L360.4 178.8L357.6 185.7L354.5 192.4L351.1 198.9L347.4 205L343.5 210.8L339.4 216.2L335.1 221.2L330.7 225.7L326.2 229.7L321.7 233.1L317.1 236L312.4 238.3L307.9 240L303.4 241.1L299 241.5L294.7 241.3L290.6 240.5L286.7 239.1L283.1 237L279.7 234.4L276.5 231.2L273.7 227.4L271.3 223.1L269.1 218.3L267.4 213.1L266 207.4L265 201.4L264.4 195.1Z"/><circle class="ct-led" data-led cx="0" cy="0" r="0.8"/><g data-pb><g data-col transform="translate(0 0)"><g class="iso-solid"><path class="iso-fill" d="M289.3 202.4L289.4 202.1L289.7 201.8L315 187.6L315.5 187.4L316.2 187.3L317 187.3L317.6 187.5L326.4 190.5L326.9 190.7L327.1 191L327.1 277.6L327.1 278L326.8 278.2L301.5 292.4L300.9 292.6L300.2 292.7L299.5 292.7L298.8 292.6L290 289.6L289.5 289.3L289.3 289Z"/><path class="iso-shade" data-shade="0" d="M327.1 277.6L327.1 278L327.1 191.4L327.1 191ZM327.1 278L326.8 278.2L326.8 191.6L327.1 191.4ZM326.8 278.2L301.5 292.4L301.5 205.8L326.8 191.6ZM301.5 292.4L300.9 292.6L300.9 206L301.5 205.8Z"/><path class="iso-shade" data-shade="1" d="M300.9 292.6L300.2 292.7L300.2 206.1L300.9 206Z"/><path class="iso-shade" data-shade="2" d="M300.2 292.7L299.5 292.7L299.5 206.1L300.2 206.1ZM299.5 292.7L298.8 292.6L298.8 206L299.5 206.1Z"/><path class="iso-shade" data-shade="3" d="M298.8 292.6L290 289.6L290 203L298.8 206ZM290 289.6L289.5 289.3L289.5 202.7L290 203ZM289.5 289.3L289.3 289L289.3 202.4L289.5 202.7Z"/><path class="iso-top" d="M326.4 190.5L326.9 190.7L327.1 191L327.1 191.4L326.8 191.6L301.5 205.8L300.9 206L300.2 206.1L299.5 206.1L298.8 206L290 203L289.5 202.7L289.3 202.4L289.4 202.1L289.7 201.8L315 187.6L315.5 187.4L316.2 187.3L317 187.3L317.6 187.5Z"/><path class="iso-line iso-crease" data-tone="faint" d="M327.1 191L327.1 191.4L326.8 191.6L301.5 205.8L300.9 206L300.2 206.1L299.5 206.1L298.8 206L290 203L289.5 202.7L289.3 202.4"/><path class="iso-line iso-bevel" data-tone="faint" d="M327.1 191L326 191.2L325.8 191.4L300.7 205.5L300.4 205.6L300.1 205.7L299.8 205.6L299.4 205.6L290.8 202.6L290.5 202.5L289.3 202.4"/><path class="iso-line iso-edge" data-tone="lo" d="M289.3 202.4L289.4 202.1L289.7 201.8L315 187.6L315.5 187.4L316.2 187.3L317 187.3L317.6 187.5L326.4 190.5L326.9 190.7L327.1 191M327.1 277.6L327.1 278L326.8 278.2L301.5 292.4L300.9 292.6L300.2 292.7L299.5 292.7L298.8 292.6L290 289.6L289.5 289.3L289.3 289M327.1 191L327.1 277.6M289.3 202.4L289.3 289"/></g></g></g></svg></div></div><figcaption class="iso-legend"><span class="iso-keys"><span class="iso-key"><svg class="iso-swatch" data-mark="lit" viewBox="0 0 16 10" aria-hidden="true"><path d="M2 4.5 8 1.5 14 4.5 14 6 8 9 2 6Z"/><path class="iso-swatch-crease" d="M2 4.5 8 7.5 14 4.5"/></svg>The X-ray tube on the rotor, firing a beam through the patient</span><span class="iso-key"><svg class="iso-swatch" data-mark="raised" viewBox="0 0 16 10" aria-hidden="true"><path d="M2 4.5 8 1.5 14 4.5 14 6 8 9 2 6Z"/><path class="iso-swatch-crease" d="M2 4.5 8 7.5 14 4.5"/></svg>The gantry, with the bore the patient passes through</span><span class="iso-key"><svg class="iso-swatch" data-mark="flat" viewBox="0 0 16 10" aria-hidden="true"><path d="M2 6.5 8 3.5 14 6.5 8 9.5Z"/></svg>The patient on the table, moved through the bore</span></span><span class="iso-caption">The table moves the patient through the bore while the rotor turns the tube and detectors around them. Each detector reading is a projection; the computer back-projects all of them into a slice. The slice here is a simulated phantom, drawn with a parallel-beam model rather than the fan beam of a real scanner.</span></figcaption></figure>
+<section class="ct-panel" aria-label="Scan data">
+  <div class="ct-controls">
+    <button type="button" class="ct-play" data-play aria-pressed="false">Pause</button>
+    <div class="ct-steps" role="group" aria-label="Stages"><button type="button" class="ct-step" data-stage="0" aria-pressed="false"><span>01</span>Lie down</button><button type="button" class="ct-step" data-stage="1" aria-pressed="false"><span>02</span>Rotate and measure</button><button type="button" class="ct-step" data-stage="2" aria-pressed="false"><span>03</span>Sinogram</button><button type="button" class="ct-step" data-stage="3" aria-pressed="false"><span>04</span>Reconstruct</button><button type="button" class="ct-step" data-stage="4" aria-pressed="false"><span>05</span>Read the slice</button></div>
+    <label class="ct-scrub"><span class="ct-scrub-label">Time</span><input type="range" data-scrub min="0" max="25" step="0.01" value="0"></label>
+  </div>
+  <div class="ct-cards">
+    <figure class="ct-card">
+      <figcaption>Detector readings</figcaption>
+      <svg class="ct-profile" data-profile viewBox="0 0 96 60" preserveAspectRatio="none" role="img" aria-label="Signal at each detector for the current angle"><polyline data-profile-line points=""/></svg>
+      <p class="ct-note">Angle <span data-angle>0°</span>. Each reading is how much of the beam got through.</p>
+    </figure>
+    <figure class="ct-card">
+      <figcaption>Sinogram</figcaption>
+      <canvas class="ct-sino" data-sino width="96" height="180" aria-label="Sinogram: one row per angle"></canvas>
+      <p class="ct-note"><span data-sino-count>0</span> of 180 projections. Each row is one angle.</p>
+    </figure>
+    <figure class="ct-card ct-card-wide">
+      <figcaption>Reconstructed slice</figcaption>
+      <div class="ct-recon-wrap">
+        <canvas class="ct-recon" data-recon width="72" height="72" aria-label="Reconstructed slice"></canvas>
+        <span class="ct-probe" data-probe hidden></span>
+      </div>
+      <p class="ct-hu" data-hu aria-live="polite">Hover the slice to read a value.</p>
+    </figure>
+  </div>
+  <ul class="ct-scale" aria-label="Hounsfield scale">
+    <li><span class="ct-swatch" data-v="air"></span>Air <b>-1000</b></li>
+    <li><span class="ct-swatch" data-v="fat"></span>Fat <b>-90</b></li>
+    <li><span class="ct-swatch" data-v="soft"></span>Soft tissue <b>+40</b></li>
+    <li><span class="ct-swatch" data-v="bone"></span>Bone <b>+900</b></li>
+  </ul>
+</section></main><script type="module">const AZIMUTH = 45;
+const ELEVATION = 30;
+const SHADES = 4;
+const RADIANS = Math.PI / 180;
+const UNIT = Math.sqrt(1.6);
+function cameraOf({ scale, azimuth = AZIMUTH, elevation = ELEVATION }) {
+    const a = azimuth * RADIANS;
+    const e = elevation * RADIANS;
+    return { sinA: Math.sin(a), cosA: Math.cos(a), sinE: Math.sin(e), cosE: Math.cos(e), k: scale * UNIT };
+}
+function iso([x, y, z], projection) {
+    const { origin } = projection;
+    const { sinA, cosA, sinE, cosE, k } = cameraOf(projection);
+    return [origin[0] + (x * sinA - y * cosA) * k, origin[1] + ((x * cosA + y * sinA) * sinE - z * cosE) * k];
+}
+function towardViewer(projection) {
+    const { sinA, cosA } = cameraOf(projection);
+    return [cosA, sinA];
+}
+function depthOf([x, y, z], projection) {
+    const { sinA, cosA, sinE, cosE } = cameraOf(projection);
+    return (x * cosA + y * sinA) * cosE + z * sinE;
+}
+const tenth = (value) => {
+    const text = (Math.round(value * 10) / 10).toFixed(1).replace(/\.0$/, "");
+    return text === "-0" ? "0" : text;
+};
+function pathOf(points, closed = false) {
+    if (!points.length)
+        return "";
+    return points.map(([x, y], at) => `${at ? "L" : "M"}${tenth(x)} ${tenth(y)}`).join("") + (closed ? "Z" : "");
+}
+const joinPaths = (paths) => paths.filter(Boolean).join("");
+function roundedPlan({ x, y, w, d, r }, steps = 8) {
+    const radius = Math.max(0, Math.min(r, w / 2, d / 2));
+    const corners = [
+        [x + w - radius, y + radius, -90],
+        [x + w - radius, y + d - radius, 0],
+        [x + radius, y + d - radius, 90],
+        [x + radius, y + radius, 180],
+    ];
+    const out = [];
+    for (const [cx, cy, start] of corners) {
+        const count = radius > 0 ? steps : 0;
+        for (let step = 0; step <= count; step++) {
+            const angle = (start + (count ? (90 * step) / count : 45)) * RADIANS;
+            out.push([cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)]);
+        }
+    }
+    return out;
+}
+function signedArea(points) {
+    let area = 0;
+    for (let index = 0; index < points.length; index++) {
+        const [ax, ay] = points[index];
+        const [bx, by] = points[(index + 1) % points.length];
+        area += ax * by - bx * ay;
+    }
+    return area / 2;
+}
+const oriented = (points) => (signedArea(points) < 0 ? [...points].reverse() : points);
+function convexHull(points) {
+    const sorted = [...points].sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    if (sorted.length < 3)
+        return sorted;
+    const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+    const lower = [];
+    for (const point of sorted) {
+        while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], point) <= 0)
+            lower.pop();
+        lower.push(point);
+    }
+    const upper = [];
+    for (let index = sorted.length - 1; index >= 0; index--) {
+        const point = sorted[index];
+        while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], point) <= 0)
+            upper.pop();
+        upper.push(point);
+    }
+    return [...lower.slice(0, -1), ...upper.slice(0, -1)];
+}
+function runsOf(flags, want) {
+    const count = flags.length;
+    const runs = [];
+    const start = flags.findIndex((flag, index) => flag !== flags[(index + count - 1) % count]);
+    if (start < 0)
+        return flags[0] === want ? [Array.from({ length: count + 1 }, (_, index) => index % count)] : [];
+    let run = null;
+    for (let step = 0; step < count; step++) {
+        const index = (start + step) % count;
+        if (flags[index] === want) {
+            if (!run)
+                run = [index];
+            run.push((index + 1) % count);
+        }
+        else if (run) {
+            runs.push(run);
+            run = null;
+        }
+    }
+    if (run)
+        runs.push(run);
+    return runs;
+}
+function extrude(ring, z, height, projection, options = {}) {
+    const convex = options.convex ?? true;
+    const count = ring.length;
+    const counter = signedArea(ring) > 0;
+    const [vx, vy] = towardViewer(projection);
+    const { sinA, cosA } = cameraOf(projection);
+    const normals = ring.map(([ax, ay], index) => {
+        const [bx, by] = ring[(index + 1) % count];
+        const dx = bx - ax;
+        const dy = by - ay;
+        const length = Math.hypot(dx, dy) || 1;
+        return (counter ? [dy / length, -dx / length] : [-dy / length, dx / length]);
+    });
+    const facing = normals.map(([nx, ny]) => nx * vx + ny * vy > 1e-9);
+    const top = ring.map(([x, y]) => iso([x, y, z + height], projection));
+    const bottom = ring.map(([x, y]) => iso([x, y, z], projection));
+    const outline = [];
+    const crease = [];
+    for (const run of runsOf(facing, false))
+        outline.push(pathOf(run.map((index) => top[index])));
+    for (const run of runsOf(facing, true)) {
+        crease.push(pathOf(run.map((index) => top[index])));
+        if (height > 0)
+            outline.push(pathOf(run.map((index) => bottom[index])));
+    }
+    if (height > 0) {
+        for (let index = 0; index < count; index++) {
+            if (facing[(index + count - 1) % count] !== facing[index])
+                outline.push(pathOf([top[index], bottom[index]]));
+        }
+    }
+    let fill;
+    if (convex) {
+        fill = pathOf(convexHull([...top, ...bottom]), true);
+    }
+    else {
+        const parts = [pathOf(oriented(top), true), pathOf(oriented(bottom), true)];
+        for (let index = 0; index < count; index++) {
+            if (!facing[index])
+                continue;
+            const next = (index + 1) % count;
+            parts.push(pathOf(oriented([top[index], top[next], bottom[next], bottom[index]]), true));
+        }
+        fill = parts.join("");
+    }
+    const buckets = Array.from({ length: SHADES }, () => []);
+    if (height > 0) {
+        const [lx, ly] = [-sinA, cosA];
+        for (let index = 0; index < count; index++) {
+            if (!facing[index])
+                continue;
+            const [nx, ny] = normals[index];
+            const lit = (nx * lx + ny * ly + 1) / 2;
+            const shade = Math.min(SHADES - 1, Math.max(0, Math.floor(lit * SHADES)));
+            const next = (index + 1) % count;
+            buckets[shade].push(pathOf(oriented([top[index], top[next], bottom[next], bottom[index]]), true));
+        }
+    }
+    let bevel;
+    if (options.bevel && options.bevel > 0) {
+        const by = options.bevel;
+        const inset = ring.map(([x, y], index) => {
+            const [ax, ay] = normals[(index + count - 1) % count];
+            const [bx, by2] = normals[index];
+            const mx = ax + bx;
+            const my = ay + by2;
+            const length = Math.hypot(mx, my) || 1;
+            return [x - (mx / length) * by, y - (my / length) * by];
+        });
+        const insetTop = inset.map(([x, y]) => iso([x, y, z + height], projection));
+        bevel = runsOf(facing, true)
+            .map((run) => pathOf([top[run[0]], ...run.slice(1, -1).map((index) => insetTop[index]), top[run[run.length - 1]]]))
+            .join("");
+    }
+    return {
+        fill,
+        outline: outline.join(""),
+        crease: crease.join(""),
+        top: pathOf(oriented(top), true),
+        shades: buckets.map((paths) => paths.join("")),
+        bevel,
+    };
+}
+const ringOf = (plan, steps = 8) => roundedPlan(plan, steps);
+function slabOf(plan, z, height, projection, steps = 8, bevel = 0) {
+    return extrude(ringOf(plan, steps), z, height, projection, { convex: true, bevel });
+}
+function circleRing(cx, cy, radius, steps = 40) {
+    return Array.from({ length: steps }, (_, step) => {
+        const angle = (step / steps) * Math.PI * 2;
+        return [cx + radius * Math.cos(angle), cy + radius * Math.sin(angle)];
+    });
+}
+function cylinder(cx, cy, radius, z, height, projection, steps = 32, bevel = 0) {
+    return extrude(circleRing(cx, cy, radius, steps), z, height, projection, { convex: true, bevel });
+}
+const insetPlan = ({ x, y, w, d, r }, by) => ({ x: x + by, y: y + by, w: w - by * 2, d: d - by * 2, r: Math.max(0, r - by) });
+function onTop(points, z, projection, closed = false) {
+    return pathOf(points.map(([x, y]) => iso([x, y, z], projection)), closed);
+}
+const planOutline = (plan, z, projection, steps = 8) => onTop(ringOf(plan, steps), z, projection, true);
+const lineOnTop = (from, to, z, projection) => onTop([from, to], z, projection);
+const segment = (from, to, projection) => pathOf([iso(from, projection), iso(to, projection)]);
+const rise = (at, from, to, projection) => segment([at[0], at[1], from], [at[0], at[1], to], projection);
+const ring = (cx, cy, radius, z, projection, steps = 40) => onTop(circleRing(cx, cy, radius, steps), z, projection, true);
+const pointsAt = (points, projection) => points.map((point) => iso(point, projection));
+function dotGrid(x, y, columns, rows, gap, z, projection) {
+    const dots = [];
+    for (let row = 0; row < rows; row++) {
+        for (let column = 0; column < columns; column++)
+            dots.push(iso([x + column * gap, y + row * gap, z], projection));
+    }
+    return dots;
+}
+function corners({ x, y, w, d }, inset = 0) {
+    return [
+        [x + inset, y + inset],
+        [x + w - inset, y + inset],
+        [x + inset, y + d - inset],
+        [x + w - inset, y + d - inset],
+    ];
+}
+function boxCorners({ x, y, w, d }, z0, z1) {
+    const out = [];
+    for (const px of [x, x + w])
+        for (const py of [y, y + d])
+            for (const z of [z0, z1])
+                out.push([px, py, z]);
+    return out;
+}
+function knurl(cx, cy, radius, z0, z1, count, projection, inset = 0.4) {
+    const [vx, vy] = towardViewer(projection);
+    const lines = [];
+    for (let index = 0; index < count; index++) {
+        const angle = (index / count) * Math.PI * 2;
+        const nx = Math.cos(angle);
+        const ny = Math.sin(angle);
+        if (nx * vx + ny * vy < 0.15)
+            continue;
+        lines.push(segment([cx + radius * nx, cy + radius * ny, z0 + inset], [cx + radius * nx, cy + radius * ny, z1 - inset], projection));
+    }
+    return lines.join("");
+}
+function sideArc(cx, cy, radius, z, projection, steps = 24) {
+    const [vx, vy] = towardViewer(projection);
+    const facing = Math.atan2(vy, vx);
+    const points = [];
+    for (let step = 0; step <= steps; step++) {
+        const angle = facing - Math.PI / 2 + (step / steps) * Math.PI;
+        points.push(iso([cx + radius * Math.cos(angle), cy + radius * Math.sin(angle), z], projection));
+    }
+    return pathOf(points);
+}
+function ringSeam(ring, z, projection) {
+    const count = ring.length;
+    const counter = signedArea(ring) > 0;
+    const [vx, vy] = towardViewer(projection);
+    const facing = ring.map(([ax, ay], index) => {
+        const [bx, by] = ring[(index + 1) % count];
+        const dx = bx - ax;
+        const dy = by - ay;
+        const [nx, ny] = counter ? [dy, -dx] : [-dy, dx];
+        return nx * vx + ny * vy > 1e-9;
+    });
+    return runsOf(facing, true).map((run) => pathOf(run.map((index) => iso([ring[index][0], ring[index][1], z], projection)))).join("");
+}
+const sideSeam = (plan, z, projection, steps = 8) => ringSeam(ringOf(plan, steps), z, projection);
+function sideRing(center, radius, axis, projection, steps = 20) {
+    const [px, py, pz] = center;
+    const points = [];
+    for (let step = 0; step < steps; step++) {
+        const angle = (step / steps) * Math.PI * 2;
+        const u = radius * Math.cos(angle);
+        const v = radius * Math.sin(angle);
+        points.push(iso(axis === "x" ? [px, py + u, pz + v] : [px + u, py, pz + v], projection));
+    }
+    return pathOf(points, true);
+}
+function coil(from, to, center, radius, turns, axis, projection, perTurn = 16) {
+    const count = Math.max(1, Math.round(turns * perTurn));
+    const back = [];
+    const front = [];
+    let run = [];
+    let near = null;
+    for (let index = 0; index <= count; index++) {
+        const share = index / count;
+        const angle = share * turns * Math.PI * 2;
+        const u = radius * Math.cos(angle);
+        const v = radius * Math.sin(angle);
+        const along = from + (to - from) * share;
+        const point = axis === "x" ? [along, center[0] + u, center[1] + v] : [center[0] + u, along, center[1] + v];
+        const normal = axis === "x" ? [0, Math.cos(angle), Math.sin(angle)] : [Math.cos(angle), 0, Math.sin(angle)];
+        const facing = depthOf(normal, projection) > 0;
+        const flat = iso(point, projection);
+        if (near === null)
+            near = facing;
+        if (facing !== near) {
+            run.push(flat);
+            (near ? front : back).push(pathOf(run));
+            run = [flat];
+            near = facing;
+            continue;
+        }
+        run.push(flat);
+    }
+    if (run.length > 1)
+        (near ? front : back).push(pathOf(run));
+    return { back: back.join(""), front: front.join("") };
+}
+function topTicks(from, to, step, every, edge, z, lengths, projection, axis = "x") {
+    const minor = [];
+    const major = [];
+    const first = Math.ceil(from / step) * step;
+    for (let at = first, index = Math.round(first / step); at <= to + 1e-9; at += step, index++) {
+        const big = index % every === 0;
+        const length = big ? lengths[1] : lengths[0];
+        const a = axis === "x" ? [at, edge] : [edge, at];
+        const b = axis === "x" ? [at, edge + length] : [edge + length, at];
+        (big ? major : minor).push(lineOnTop(a, b, z, projection));
+    }
+    return { minor: minor.join(""), major: major.join("") };
+}
+function sideTicks(from, to, step, every, face, top, lengths, projection, axis = "x") {
+    const minor = [];
+    const major = [];
+    const first = Math.ceil(from / step) * step;
+    for (let at = first, index = Math.round(first / step); at <= to + 1e-9; at += step, index++) {
+        const big = index % every === 0;
+        const length = big ? lengths[1] : lengths[0];
+        const a = axis === "x" ? [at, face, top] : [face, at, top];
+        const b = axis === "x" ? [at, face, top - length] : [face, at, top - length];
+        (big ? major : minor).push(segment(a, b, projection));
+    }
+    return { minor: minor.join(""), major: major.join("") };
+}
+function radialTicks(cx, cy, radius, count, every, z, lengths, projection, from = 0, span = Math.PI * 2) {
+    const minor = [];
+    const major = [];
+    const closed = Math.abs(span - Math.PI * 2) < 1e-9;
+    const steps = closed ? count : count + 1;
+    for (let index = 0; index < steps; index++) {
+        const angle = from + (index / count) * span;
+        const big = index % every === 0;
+        const inner = radius - (big ? lengths[1] : lengths[0]);
+        const sx = Math.sin(angle);
+        const sy = -Math.cos(angle);
+        (big ? major : minor).push(lineOnTop([cx + sx * inner, cy + sy * inner], [cx + sx * radius, cy + sy * radius], z, projection));
+    }
+    return { minor: minor.join(""), major: major.join("") };
+}
+const haloOf = (plan, z, height, projection) => slabOf(plan, z, height, projection).fill;
+function axisVector(projection, [dx, dy, dz]) {
+    const origin = iso([0, 0, 0], projection);
+    const moved = iso([dx, dy, dz], projection);
+    return [moved[0] - origin[0], moved[1] - origin[1]];
+}
+const fine = (value) => Math.round(value * 100) / 100;
+function translateAlong(projection, by) {
+    const [x, y] = axisVector(projection, by);
+    return `translate(${fine(x)} ${fine(y)})`;
+}
+const thousandth = (value) => Math.round(value * 1000) / 1000;
+function axesAt(at, z, projection) {
+    const origin = iso([at[0], at[1], z], projection);
+    const along = (point) => {
+        const [px, py] = iso(point, projection);
+        return [px - origin[0], py - origin[1]];
+    };
+    return { origin, x: along([at[0] + 1, at[1], z]), y: along([at[0], at[1] + 1, z]), z: along([at[0], at[1], z + 1]) };
+}
+const matrixOf = (u, v, origin) => `matrix(${thousandth(u[0])} ${thousandth(u[1])} ${thousandth(v[0])} ${thousandth(v[1])} ${thousandth(origin[0])} ${thousandth(origin[1])})`;
+function holdStill(element, [dx, dy]) {
+    const text = dx || dy ? `translate(${-dx} ${-dy})` : "";
+    element.querySelectorAll("[data-hold]").forEach((node) => (text ? node.setAttribute("transform", text) : node.removeAttribute("transform")));
+}
+function topMatrix(at, z, projection, along = "x") {
+    const { origin, x, y } = axesAt(at, z, projection);
+    return along === "x" ? matrixOf(x, y, origin) : matrixOf([-y[0], -y[1]], x, origin);
+}
+function sideMatrix(at, z, projection, face) {
+    const { origin, x, y, z: up } = axesAt(at, z, projection);
+    const down = [-up[0], -up[1]];
+    return face === "left" ? matrixOf(x, down, origin) : matrixOf([-y[0], -y[1]], down, origin);
+}
+function screenRise(height, projection) {
+    const { cosE, k } = cameraOf(projection);
+    return height * cosE * k;
+}
+function fitProjection(points, width, height, { pad = 24, headroom = 0, azimuth = AZIMUTH, elevation = ELEVATION } = {}) {
+    const unit = { origin: [0, 0], scale: 1, azimuth, elevation };
+    const flat = points.map((point) => iso(point, unit));
+    const xs = flat.map(([x]) => x);
+    const ys = flat.map(([, y]) => y);
+    const left = Math.min(...xs);
+    const right = Math.max(...xs);
+    const up = Math.min(...ys);
+    const down = Math.max(...ys);
+    const scale = Math.min((width - pad * 2) / (right - left), (height - pad * 2 - headroom) / (down - up));
+    return {
+        origin: [width / 2 - ((left + right) / 2) * scale, headroom + (height - headroom) / 2 - ((up + down) / 2) * scale],
+        scale,
+        azimuth,
+        elevation,
+    };
+}
+const escape = (text) => text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+const attrs = (pairs) => Object.entries(pairs)
+    .filter(([, value]) => value !== undefined && value !== false)
+    .map(([key, value]) => ` ${key}="${escape(String(value))}"`)
+    .join("");
+function solidSvg(paths, { tone = "hi", crease = "faint", halo = false, lit = false, flat = false, className, inner = "" } = {}) {
+    const parts = [];
+    if (halo)
+        parts.push(`<path class="iso-halo" d="${paths.fill}"/>`);
+    parts.push(`<path class="iso-fill" d="${paths.fill}"/>`);
+    if (!flat) {
+        paths.shades.forEach((d, shade) => {
+            if (d)
+                parts.push(`<path class="iso-shade" data-shade="${shade}" d="${d}"/>`);
+        });
+        parts.push(`<path class="iso-top" d="${paths.top}"/>`);
+    }
+    if (crease !== "none" && paths.crease)
+        parts.push(`<path class="iso-line iso-crease" data-tone="${crease}" d="${paths.crease}"/>`);
+    if (crease !== "none" && paths.bevel)
+        parts.push(`<path class="iso-line iso-bevel" data-tone="${crease}" d="${paths.bevel}"/>`);
+    if (inner)
+        parts.push(inner);
+    parts.push(`<path class="iso-line iso-edge" data-tone="${tone}" d="${paths.outline}"/>`);
+    return `<g${attrs({ class: className ? `iso-solid ${className}` : "iso-solid", "data-lit": lit ? "" : undefined, "data-seamless": paths.seamless ? "" : undefined })}>${parts.join("")}</g>`;
+}
+function lineSvg(d, { tone = "lo", dotted = false, dashed = false, flow = false, className, free } = {}) {
+    if (!d)
+        return "";
+    return `<path${attrs({
+        class: className ? `iso-line ${className}` : "iso-line",
+        "data-tone": tone,
+        "data-free": free === true ? "" : free || undefined,
+        "data-dotted": dotted ? "" : undefined,
+        "data-dashed": dashed ? "" : undefined,
+        "data-flow": flow ? "" : undefined,
+        d,
+    })}/>`;
+}
+function dotsSvg(points, { size = 0.5, tone = "mid", pulse = false } = {}) {
+    const dots = points
+        .map(([x, y, alpha], index) => `<circle cx="${tenth(x)}" cy="${tenth(y)}" r="${size}"${alpha !== undefined && alpha < 1 ? ` fill-opacity="${Math.max(0, alpha).toFixed(2)}"` : ""}${pulse ? ` data-pulse="" style="--pulse-at:${(index * 137) % 1600}ms"` : ""}/>`)
+        .join("");
+    return `<g class="iso-dots" data-tone="${tone}">${dots}</g>`;
+}
+function fadedSvg(list, style = {}) {
+    const groups = new Map();
+    for (const entry of list) {
+        const [d, alpha] = Array.isArray(entry) ? entry : [entry.d, entry.alpha];
+        if (!d || !(alpha > 0.02))
+            continue;
+        const level = Math.min(1, Math.round(alpha * 20) / 20);
+        groups.set(level, (groups.get(level) ?? "") + d);
+    }
+    return [...groups].map(([alpha, d]) => (alpha >= 1 ? lineSvg(d, style) : `<g opacity="${alpha.toFixed(2)}">${lineSvg(d, style)}</g>`)).join("");
+}
+function fadeLineSvg(points, { fade = [0, 0], tone = "lo", className, stops = 6 } = {}) {
+    if (points.length < 2)
+        return "";
+    const ease = (t) => t * t * (3 - 2 * t);
+    const hashOf = (text) => {
+        let hash = 2166136261;
+        for (let index = 0; index < text.length; index++)
+            hash = Math.imul(hash ^ text.charCodeAt(index), 16777619);
+        return (hash >>> 0).toString(36);
+    };
+    const lengths = [0];
+    for (let index = 1; index < points.length; index++)
+        lengths.push(lengths[index - 1] + Math.hypot(points[index][0] - points[index - 1][0], points[index][1] - points[index - 1][1]));
+    const at = (length) => {
+        let index = 1;
+        while (index < points.length - 1 && lengths[index] < length)
+            index++;
+        const span = lengths[index] - lengths[index - 1] || 1;
+        const t = Math.max(0, Math.min(1, (length - lengths[index - 1]) / span));
+        return [points[index - 1][0] + (points[index][0] - points[index - 1][0]) * t, points[index - 1][1] + (points[index][1] - points[index - 1][1]) * t];
+    };
+    const pieceOf = (from, to) => [at(from), ...points.filter((_, index) => lengths[index] > from + 1e-6 && lengths[index] < to - 1e-6), at(to)];
+    const total = lengths[lengths.length - 1];
+    if (total < 1e-6)
+        return "";
+    let [start, end] = Array.isArray(fade) ? fade : [fade, fade];
+    if (start + end > total) {
+        const share = total / (start + end);
+        start *= share;
+        end *= share;
+    }
+    const paint = `var(--anatomy-${tone})`;
+    const ramp = (piece, rising) => {
+        const d = pathOf(piece);
+        const [x1, y1] = piece[0];
+        const [x2, y2] = piece[piece.length - 1];
+        const id = `iso-fade-${hashOf(`${d}|${tone}|${rising}`)}`;
+        const marks = Array.from({ length: stops + 1 }, (_, index) => {
+            const t = index / stops;
+            const alpha = ease(rising ? t : 1 - t);
+            return `<stop offset="${t.toFixed(3)}" stop-opacity="${alpha.toFixed(3)}" style="stop-color:${paint}"/>`;
+        }).join("");
+        const gradient = `<linearGradient id="${id}" gradientUnits="userSpaceOnUse" x1="${tenth(x1)}" y1="${tenth(y1)}" x2="${tenth(x2)}" y2="${tenth(y2)}">${marks}</linearGradient>`;
+        return `<defs>${gradient}</defs><path${attrs({ class: className ? `iso-line ${className}` : "iso-line", "data-tone": tone, "data-free": rising ? "start" : "end", d, style: `stroke:url(#${id})` })}/>`;
+    };
+    const parts = [];
+    if (start > 0.05)
+        parts.push(ramp(pieceOf(0, start), true));
+    if (total - end - start > 0.05)
+        parts.push(lineSvg(pathOf(pieceOf(start, total - end)), { tone, className }));
+    if (end > 0.05)
+        parts.push(ramp(pieceOf(total - end, total), false));
+    return `<g class="iso-fade">${parts.join("")}</g>`;
+}
+function wireSvg(from, to, { via = [], tone = "lo", dotted = false, dashed = false, flow = false, ends = "both", size = 1.2 } = {}) {
+    const d = pathOf([from, ...via, to]);
+    const end = ([x, y]) => `<circle class="iso-wire-end" cx="${tenth(x)}" cy="${tenth(y)}" r="${size}"/>`;
+    return `<g class="iso-wire" data-tone="${tone}">${lineSvg(d, { tone, dotted, dashed, flow })}${ends === "both" || ends === "from" ? end(from) : ""}${ends === "both" || ends === "to" ? end(to) : ""}</g>`;
+}
+function faceTextSvg(transform, text, { size = 3, tone = "mid", anchor = "start" } = {}) {
+    return `<text class="iso-face-text" data-tone="${tone}" transform="${transform}" font-size="${size}" text-anchor="${anchor}">${escape(text)}</text>`;
+}
+function groupSvg(children, extra = {}) {
+    return `<g${attrs(extra)}>${Array.isArray(children) ? children.join("") : children}</g>`;
+}
+function figureSvg({ width, height, label, body, standalone = false, className }) {
+    const style = standalone ? `<style>${ISO_CSS}</style>` : "";
+    return `<svg${attrs({
+        xmlns: "http://www.w3.org/2000/svg",
+        class: `iso-svg${standalone ? " iso" : ""}${className ? ` ${className}` : ""}`,
+        "data-theme": standalone || undefined,
+        viewBox: `0 0 ${width} ${height}`,
+        role: "img",
+        "aria-label": label,
+    })}>${style}${Array.isArray(body) ? body.join("") : body}</svg>`;
+}
+function swatchSvg(mark) {
+    if (mark === "raised" || mark === "flat" || mark === "lit") {
+        const body = mark === "flat" ? "M2 6.5 8 3.5 14 6.5 8 9.5Z" : "M2 4.5 8 1.5 14 4.5 14 6 8 9 2 6Z";
+        const crease = mark === "flat" ? "" : `<path class="iso-swatch-crease" d="M2 4.5 8 7.5 14 4.5"/>`;
+        return `<svg class="iso-swatch" data-mark="${mark}" viewBox="0 0 16 10" aria-hidden="true"><path d="${body}"/>${crease}</svg>`;
+    }
+    return `<svg class="iso-swatch" data-mark="${mark}" viewBox="0 0 16 10" aria-hidden="true"><path d="M1.5 5h13"/></svg>`;
+}
+function plateHtml({ fig, title, hint, readout = "", keys = [], caption, body }) {
+    const corner = (name, text, extra = "") => `<span class="iso-plate-corner" data-corner="${name}"${extra}>${escape(text)}</span>`;
+    const legend = keys.length || caption
+        ? `<figcaption class="iso-legend">${keys.length ? `<span class="iso-keys">${keys.map((key) => `<span class="iso-key">${swatchSvg(key.mark)}${escape(key.label)}</span>`).join("")}</span>` : ""}${caption ? `<span class="iso-caption">${escape(caption)}</span>` : ""}</figcaption>`
+        : "";
+    return `<figure class="iso-figure"><div class="iso-plate"><div class="iso-plate-corners" aria-hidden="true">${corner("fig", fig)}${title ? corner("title", title) : ""}${hint ? corner("hint", hint) : ""}${corner("readout", readout, " data-readout")}</div>${body}</div>${legend}</figure>`;
+}
+function pageHtml({ title, theme = "dark", body, script = "", width = 650 }) {
+    return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escape(title)}</title><style>${ISO_CSS}${PAGE_CSS.replace("__WIDTH__", String(width))}</style></head><body class="iso" data-theme="${theme}"><main class="iso-page">${body}</main>${script ? `<script type="module">${script.replace(/<\/(script)/gi, "<\\/$1")}<\/script>` : ""}</body></html>`;
+}
+const PAGE_CSS = `
+*{box-sizing:border-box}
+html{color-scheme:dark}
+body[data-theme="light"]{color-scheme:light}
+body{margin:0;background:var(--anatomy-page);color:var(--anatomy-text);font:14px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.iso-page{width:min(__WIDTH__px,100% - 32px);margin:64px auto 96px}
+`;
+const ISO_CSS = `
+.iso{
+  --anatomy-page:#0b0b0b;--anatomy-card:#131313;--anatomy-text:#a3a3a3;--anatomy-strong:#e6e6e6;--anatomy-muted:#6e6e6e;
+  --anatomy-paper:#131313;--anatomy-face:#1b1b1b;--anatomy-top:#1c1c1c;
+  --anatomy-shade-0:#0f0f0f;--anatomy-shade-1:#121212;--anatomy-shade-2:#151515;--anatomy-shade-3:#181818;
+  --anatomy-lit-top:#262626;--anatomy-lit-shade:#1d1d1d;
+  --anatomy-hi:#d4d4d4;--anatomy-mid:#6a6a6a;--anatomy-lo:#3e3e3e;--anatomy-faint:#2a2a2a;--anatomy-lit:#ffffff;
+  --anatomy-halo:#050505;--anatomy-halo-opacity:.9;--anatomy-dot:#e6e6e6;
+  --anatomy-red:#ff6b6b;--anatomy-green:#6be0a0;--anatomy-blue:#6b9bff;
+  --anatomy-weight:.6px;--anatomy-ease:cubic-bezier(.32,.72,0,1);
+  --anatomy-mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --anatomy-lift:inset 0 1px 0 0 #ffffff0a,inset 0 0 0 1px #ffffff06,0 0 0 1px #00000026,0 1px 1px -.5px #00000014,0 3px 3px -1.5px #00000014,0 6px 6px -3px #00000014,0 12px 12px -6px #00000014;
+}
+.iso[data-theme="light"]{
+  --anatomy-page:#f2f2ef;--anatomy-card:#fbfbfa;--anatomy-text:#57575a;--anatomy-strong:#18181a;--anatomy-muted:#8c8c90;
+  --anatomy-paper:#fbfbfa;--anatomy-face:#ffffff;--anatomy-top:#ffffff;
+  --anatomy-shade-0:#dcdcd9;--anatomy-shade-1:#e5e5e2;--anatomy-shade-2:#ededea;--anatomy-shade-3:#f4f4f1;
+  --anatomy-lit-top:#ffffff;--anatomy-lit-shade:#eeeeeb;
+  --anatomy-hi:#26262a;--anatomy-mid:#8a8a8f;--anatomy-lo:#b4b4b8;--anatomy-faint:#d4d4d6;--anatomy-lit:#000000;
+  --anatomy-halo:#8a8a80;--anatomy-halo-opacity:.32;--anatomy-dot:#3a3a3e;
+  --anatomy-red:#e5484d;--anatomy-green:#30a46c;--anatomy-blue:#3e63dd;
+  --anatomy-lift:inset 0 1px 0 0 #ffffff,0 0 0 1px #0000000f,0 1px 1px -.5px #0000000a,0 3px 3px -1.5px #0000000a,0 6px 6px -3px #0000000a,0 12px 12px -6px #0000000a;
+}
+.iso-svg{display:block;width:100%;height:auto;overflow:visible}
+.iso-svg path,.iso-svg circle{vector-effect:non-scaling-stroke}
+.iso-fill{fill:var(--anatomy-paper);stroke:none}
+.iso-solid[data-lit]>.iso-fill{fill:var(--anatomy-face)}
+.iso-shade,.iso-top{stroke:none}
+.iso-shade[data-shade="0"]{fill:var(--anatomy-shade-0)}
+.iso-shade[data-shade="1"]{fill:var(--anatomy-shade-1)}
+.iso-shade[data-shade="2"]{fill:var(--anatomy-shade-2)}
+.iso-shade[data-shade="3"]{fill:var(--anatomy-shade-3)}
+.iso-top{fill:var(--anatomy-top)}
+.iso-solid[data-lit]>.iso-top{fill:var(--anatomy-lit-top)}
+.iso-solid[data-lit]>.iso-shade{fill:var(--anatomy-lit-shade)}
+.iso-solid[data-seamless]>.iso-shade,.iso-solid[data-seamless]>.iso-top{stroke-width:.4;stroke-linejoin:round}
+.iso-solid[data-seamless]>.iso-shade[data-shade="0"]{stroke:var(--anatomy-shade-0)}
+.iso-solid[data-seamless]>.iso-shade[data-shade="1"]{stroke:var(--anatomy-shade-1)}
+.iso-solid[data-seamless]>.iso-shade[data-shade="2"]{stroke:var(--anatomy-shade-2)}
+.iso-solid[data-seamless]>.iso-shade[data-shade="3"]{stroke:var(--anatomy-shade-3)}
+.iso-solid[data-seamless]>.iso-top{stroke:var(--anatomy-top)}
+.iso-solid[data-seamless][data-lit]>.iso-top{stroke:var(--anatomy-lit-top)}
+.iso-solid[data-seamless][data-lit]>.iso-shade{stroke:var(--anatomy-lit-shade)}
+.iso-solid[data-lit]>.iso-edge{stroke:var(--anatomy-lit)}
+.iso-halo{fill:var(--anatomy-halo);stroke:none;filter:blur(9px);opacity:var(--anatomy-halo-opacity);transform:translateY(3px)}
+.iso-line{fill:none;stroke:var(--anatomy-lo);stroke-width:var(--anatomy-weight);stroke-linecap:round;stroke-linejoin:round}
+.iso-line[data-tone="hi"]{stroke:var(--anatomy-hi)}
+.iso-line[data-tone="mid"]{stroke:var(--anatomy-mid)}
+.iso-line[data-tone="lo"]{stroke:var(--anatomy-lo)}
+.iso-line[data-tone="faint"]{stroke:var(--anatomy-faint)}
+.iso-line[data-tone="lit"]{stroke:var(--anatomy-lit)}
+.iso-line[data-tone="red"]{stroke:var(--anatomy-red)}
+.iso-line[data-tone="green"]{stroke:var(--anatomy-green)}
+.iso-line[data-tone="blue"]{stroke:var(--anatomy-blue)}
+.iso-line[data-dotted]{stroke-dasharray:.01 3.5;stroke-width:1}
+.iso-line[data-dashed]{stroke-dasharray:3 3}
+.iso-line[data-flow]{stroke-dasharray:2 6}
+.iso-wire-end{fill:var(--anatomy-paper);stroke:var(--anatomy-lo);stroke-width:var(--anatomy-weight)}
+.iso-wire[data-tone="hi"] .iso-wire-end{stroke:var(--anatomy-hi)}
+.iso-wire[data-tone="mid"] .iso-wire-end{stroke:var(--anatomy-mid)}
+.iso-wire[data-tone="faint"] .iso-wire-end{stroke:var(--anatomy-faint)}
+.iso-wire[data-tone="lit"] .iso-wire-end{stroke:var(--anatomy-lit)}
+.iso-dots circle{fill:var(--anatomy-dot);stroke:none;opacity:.32}
+.iso-dots[data-tone="hi"] circle{opacity:.85}
+.iso-dots[data-tone="mid"] circle{opacity:.45}
+.iso-dots[data-tone="lo"] circle{opacity:.22}
+.iso-dots[data-tone="faint"] circle{opacity:.12}
+.iso-face-text{fill:var(--anatomy-mid);font-family:var(--anatomy-mono);letter-spacing:.04em}
+.iso-face-text[data-tone="hi"]{fill:var(--anatomy-hi)}
+.iso-face-text[data-tone="lo"]{fill:var(--anatomy-lo)}
+.iso-face-text[data-tone="faint"]{fill:var(--anatomy-faint)}
+.tb-body{fill:var(--anatomy-shade-2);stroke:none}
+.tb-shine{fill:var(--anatomy-top);stroke:none}
+.tb-shade{fill:var(--anatomy-shade-0);stroke:none}
+.tb-ring{fill:none;stroke:var(--anatomy-lo);stroke-width:.45;stroke-linecap:butt;stroke-linejoin:round}
+.tb-ring[data-tone="mid"]{stroke:var(--anatomy-mid)}
+.tb-ring[data-tone="faint"]{stroke:var(--anatomy-faint)}
+.tb-ring[data-tone="hi"]{stroke:var(--anatomy-hi)}
+@keyframes iso-flow{to{stroke-dashoffset:-32}}
+@keyframes iso-pulse{0%,100%{opacity:.18}12%{opacity:1}40%{opacity:.18}}
+.iso-line[data-flow]{animation:iso-flow 1600ms linear infinite}
+.iso-dots circle[data-pulse]{animation:iso-pulse 1600ms steps(1,end) infinite;animation-delay:var(--pulse-at,0ms)}
+.iso-figure{margin:32px 0 36px}
+.iso-plate{position:relative;padding:52px 24px;border-radius:0;background:var(--anatomy-card);box-shadow:0 0 0 1px var(--anatomy-mid);--anatomy-paper:var(--anatomy-card)}
+.iso-plate-corners{position:absolute;inset:18px 20px;pointer-events:none}
+.iso-plate-corner{position:absolute;color:var(--anatomy-muted);font-family:var(--anatomy-mono);font-size:10.5px;line-height:1;letter-spacing:.04em;white-space:nowrap}
+.iso-plate-corner[data-corner="fig"]{top:0;left:0;color:var(--anatomy-text)}
+.iso-plate-corner[data-corner="title"]{top:0;right:0;text-transform:uppercase;letter-spacing:.1em}
+.iso-plate-corner[data-corner="hint"]{bottom:0;left:0;text-transform:uppercase;letter-spacing:.1em}
+.iso-plate-corner[data-corner="readout"]{right:0;bottom:0;color:var(--anatomy-text);font-variant-numeric:tabular-nums}
+.iso-plate .iso-svg{margin:0 auto}
+.iso-legend{display:grid;gap:8px;margin-top:12px;color:var(--anatomy-muted);font-size:13px;line-height:1.55}
+.iso-keys{display:flex;flex-wrap:wrap;gap:6px 18px}
+.iso-key{display:inline-flex;align-items:center;gap:7px}
+.iso-swatch{width:16px;height:10px;flex:none;overflow:visible}
+.iso-swatch path{fill:none;stroke:var(--anatomy-hi);stroke-width:1;vector-effect:non-scaling-stroke;stroke-linejoin:round;stroke-linecap:round}
+.iso-swatch[data-mark="raised"] path,.iso-swatch[data-mark="flat"] path{stroke:var(--anatomy-mid)}
+.iso-swatch[data-mark="lit"] path{stroke:var(--anatomy-lit)}
+.iso-swatch[data-mark="dim"] path{stroke:var(--anatomy-lo)}
+.iso-swatch[data-mark="dotted"] path{stroke-dasharray:.01 3;stroke-width:1.4}
+.iso-swatch[data-mark="dashed"] path{stroke-dasharray:3 2.5}
+.iso-swatch[data-mark="red"] path{stroke:var(--anatomy-red)}
+.iso-swatch[data-mark="green"] path{stroke:var(--anatomy-green)}
+.iso-swatch[data-mark="blue"] path{stroke:var(--anatomy-blue)}
+.iso-swatch-crease{stroke:var(--anatomy-lo)!important}
+@media (max-width:560px){.iso-plate{padding:48px 12px 70px}.iso-plate-corner[data-corner="hint"]{bottom:18px}}
+@media (prefers-reduced-motion:reduce){.iso-line[data-flow],.iso-dots circle[data-pulse]{animation:none}}
+`;
+
+// CT scan: the pure model. The slice is a simulated phantom on the unit disc (not a patient).
+// Attenuation is measured in Hounsfield units plus 1000, so air is 0 and water is 1000.
+const N_ANG = 180;
+const N_BIN = 96;
+const GRID = 72;
+const DS = 0.01;
+const BIN = (2 * 1) / N_BIN;
+const HU = { air: -1000, fat: -90, soft: 40, lung: -750, bone: 900, lesion: 90 };
+const WINDOW = { level: 40, width: 400 };
+
+const STAGES = [
+  { key: "lie", label: "Lie down", dur: 3 },
+  { key: "rotate", label: "Rotate and measure", dur: 8 },
+  { key: "sino", label: "Sinogram", dur: 3 },
+  { key: "recon", label: "Reconstruct", dur: 6 },
+  { key: "read", label: "Read the slice", dur: 5 },
+];
+const STARTS = STAGES.reduce((list, stage, i) => (list.push(i ? list[i - 1] + STAGES[i - 1].dur : 0), list), []);
+const TOTAL = STARTS[STARTS.length - 1] + STAGES[STAGES.length - 1].dur;
+const ROTATE = { from: STARTS[1], to: STARTS[1] + STAGES[1].dur };
+const RECON = { from: STARTS[3], to: STARTS[3] + STAGES[3].dur };
+const TABLE = { in: [0, 3], out: [TOTAL - 3.5, TOTAL], travel: 120 };
+
+const ell = (x, y, cx, cy, a, b) => ((x - cx) / a) ** 2 + ((y - cy) / b) ** 2 <= 1;
+const disc = (x, y, cx, cy, r) => (x - cx) ** 2 + (y - cy) ** 2 <= r * r;
+
+function huAt(x, y) {
+  if (x * x + y * y > 1) return HU.air;
+  if (disc(x, y, 0, -0.42, 0.13)) return HU.bone;
+  if (disc(x, y, -0.12, 0.22, 0.1)) return HU.lesion;
+  if (ell(x, y, -0.36, 0.08, 0.24, 0.36) || ell(x, y, 0.36, 0.08, 0.24, 0.36)) return HU.lung;
+  if (ell(x, y, 0, 0, 0.78, 0.61)) return HU.soft;
+  if (ell(x, y, 0, 0, 0.86, 0.68)) return HU.fat;
+  return HU.air;
+}
+
+const angleOf = (i) => (2 * Math.PI * i) / N_ANG;
+const binT = (k) => -1 + ((k + 0.5) * 2) / N_BIN;
+
+function projections() {
+  const rows = [];
+  for (let i = 0; i < N_ANG; i++) {
+    const c = Math.cos(angleOf(i)), s = Math.sin(angleOf(i));
+    const row = new Float64Array(N_BIN);
+    for (let k = 0; k < N_BIN; k++) {
+      const t = binT(k);
+      const half = Math.sqrt(Math.max(0, 1 - t * t));
+      let sum = 0;
+      for (let u = -half; u <= half; u += DS) sum += huAt(t * c - u * s, t * s + u * c) + 1000;
+      row[k] = sum * DS;
+    }
+    rows.push(row);
+  }
+  return rows;
+}
+
+// Ram-Lak ramp filter, applied as a discrete convolution in detector bins.
+const KERNEL = (() => {
+  const h = new Float64Array(2 * N_BIN - 1);
+  for (let n = -(N_BIN - 1); n <= N_BIN - 1; n++) {
+    h[n + N_BIN - 1] = n === 0 ? 1 / (4 * BIN * BIN) : n % 2 ? -1 / (Math.PI ** 2 * n * n * BIN * BIN) : 0;
+  }
+  return h;
+})();
+
+function filter(row) {
+  const out = new Float64Array(N_BIN);
+  for (let k = 0; k < N_BIN; k++) {
+    let sum = 0;
+    for (let j = 0; j < N_BIN; j++) sum += row[j] * KERNEL[k - j + N_BIN - 1];
+    out[k] = sum * BIN;
+  }
+  return out;
+}
+
+const pixelXY = (col, row) => [-1 + ((col + 0.5) * 2) / GRID, 1 - ((row + 0.5) * 2) / GRID];
+const inside = (col, row) => {
+  const [x, y] = pixelXY(col, row);
+  return x * x + y * y <= 1;
+};
+
+// Filtered back-projection, one angle at a time so the image can build up on screen.
+const SCALE = Math.PI / N_ANG;
+function backprojectAngle(img, filtered, i) {
+  const c = Math.cos(angleOf(i)), s = Math.sin(angleOf(i));
+  for (let row = 0; row < GRID; row++) {
+    for (let col = 0; col < GRID; col++) {
+      if (!inside(col, row)) continue;
+      const [x, y] = pixelXY(col, row);
+      const t = x * c + y * s;
+      const u = (t + 1) / BIN - 0.5;
+      const k = Math.floor(u);
+      const f = u - k;
+      const a = k >= 0 && k < N_BIN ? filtered[k] : 0;
+      const b = k + 1 >= 0 && k + 1 < N_BIN ? filtered[k + 1] : 0;
+      img[row * GRID + col] += (a * (1 - f) + b * f) * SCALE;
+    }
+  }
+}
+
+function reconstructUpTo(filtered, count) {
+  const img = new Float64Array(GRID * GRID);
+  for (let i = 0; i < count; i++) backprojectAngle(img, filtered[i], i);
+  return img;
+}
+
+const huOf = (value) => value - 1000;
+
+function tissueOf(hu) {
+  if (hu < -500) return "air or lung";
+  if (hu < -20) return "fat";
+  if (hu < 150) return "soft tissue";
+  return "bone";
+}
+
+const PROBES = [
+  { name: "spine", x: 0, y: -0.42 },
+  { name: "lung", x: -0.36, y: 0.08 },
+  { name: "lesion", x: -0.12, y: 0.22 },
+  { name: "soft tissue", x: 0, y: -0.1 },
+  { name: "fat", x: 0, y: 0.645 },
+  { name: "air", x: 0.9, y: 0.6 },
+];
+
+const clamp = (v, lo = 0, hi = 1) => Math.max(lo, Math.min(hi, v));
+const ease = (t) => {
+  t = clamp(t);
+  return t * t * (3 - 2 * t);
+};
+const span = (T, [a, b]) => clamp((T - a) / (b - a));
+
+function stateAt(T) {
+  const time = clamp(T, 0, TOTAL - 1e-6);
+  let stage = STARTS.findIndex((start, i) => time >= start && time < start + STAGES[i].dur);
+  if (stage < 0) stage = STAGES.length - 1;
+  const inRotate = span(time, [ROTATE.from, ROTATE.to]);
+  const rotating = time >= ROTATE.from && time < ROTATE.to;
+  const theta = rotating ? 2 * Math.PI * inRotate : time >= ROTATE.to ? 2 * Math.PI : 0;
+  const inReconAt = (time - RECON.from) / (RECON.to - RECON.from);
+  const reconCount = time < RECON.from ? 0 : time >= RECON.to ? N_ANG : Math.floor(clamp(inReconAt) * N_ANG);
+  const sinoCount = time < ROTATE.from ? 0 : time >= ROTATE.to ? N_ANG : Math.floor(inRotate * N_ANG) + 1;
+  const beam = rotating ? ease(span(time, [ROTATE.from, ROTATE.from + 0.4])) * (1 - ease(span(time, [ROTATE.to - 0.4, ROTATE.to]))) : 0;
+  const tableIn = ease(span(time, TABLE.in));
+  const tableOut = ease(span(time, TABLE.out));
+  const dx = -TABLE.travel * (1 - tableIn) - TABLE.travel * tableOut;
+  const angleIndex = rotating ? Math.min(N_ANG - 1, Math.floor(inRotate * N_ANG)) : sinoCount ? Math.min(N_ANG - 1, sinoCount - 1) : 0;
+  const probeT = stage === 4 ? span(time, [STARTS[4], STARTS[4] + STAGES[4].dur - 0.5]) : 0;
+  const probeIndex = Math.min(PROBES.length - 1, Math.floor(probeT * PROBES.length));
+  const degrees = Math.round(((theta * 180) / Math.PI) % 360);
+  return {
+    stage,
+    time,
+    theta,
+    beam,
+    dx,
+    sinoCount,
+    reconCount,
+    angleIndex,
+    degrees,
+    probe: PROBES[probeIndex],
+    tableMm: Math.round(-dx * 0.5),
+  };
+}
+
+const DATA = {"P":{"origin":[364.1443905106326,319.2627883407532],"scale":1.4762575605153887,"azimuth":52,"elevation":26},"GEO":{"zc":86,"housing":76,"half":32,"bore":46,"rotor":44,"img":30,"spot":38.5,"det":42.5,"tubeR":3.2,"cells":24,"travel":120,"base":{"x":-180,"y":-62,"w":300,"d":124,"r":6},"baseH":10,"table":{"x":-44,"y":-28,"w":72,"d":56,"r":2},"tableT":4,"patient":{"a":25.8,"b":20.4,"half":22},"column":{"x":-42,"y":-12,"w":8,"d":24,"r":1}},"TABLE_TOP":65.6};
+// Live layer: one clock T through the scan. Everything is redrawn from stateAt(T) and the model's data.
+const { P, GEO } = DATA;
+const root = document.querySelector(".ct-stage");
+const svg = root.querySelector("svg");
+const q = (sel) => svg.querySelector(sel);
+const beamEl = q("[data-beam]");
+const tubeEl = q("[data-tube]");
+const cellsEl = q("[data-cells]");
+const ledEl = q("[data-led]");
+const tubesEl = q("[data-tubes]");
+const topEl = q("[data-top]");
+const colEl = q("[data-col]");
+const slotA = q("[data-pa]");
+const slotB = q("[data-pb]");
+const playBtn = document.querySelector("[data-play]");
+const scrub = document.querySelector("[data-scrub]");
+const stepBtns = [...document.querySelectorAll("[data-stage]")];
+const profileLine = document.querySelector("[data-profile-line]");
+const angleEl = document.querySelector("[data-angle]");
+const sinoCount = document.querySelector("[data-sino-count]");
+const sinoCanvas = document.querySelector("[data-sino]");
+const reconCanvas = document.querySelector("[data-recon]");
+const reconWrap = document.querySelector(".ct-recon-wrap");
+const probeEl = document.querySelector("[data-probe]");
+const huEl = document.querySelector("[data-hu]");
+const readout = document.querySelector("[data-readout]");
+const still = matchMedia("(prefers-reduced-motion: reduce)");
+
+const C = [0, 0, GEO.zc];
+const CELLS = GEO.cells;
+const CELL_W = (2 * GEO.img) / CELLS;
+const LED_AT = [-GEO.half, 0, GEO.zc + GEO.housing - 14];
+
+const rows = projections();
+const filtered = rows.map(filter);
+const peak = Math.max(...rows.map((row) => Math.max(...row)));
+const toScreen = (p) => iso(p, P);
+
+// Point on the rotor: radius r from the axis, at angle phi from the detector side (phi = PI is the tube side).
+function onRotor(th, r, phi, x = 0) {
+  const cp = Math.cos(phi), sp = Math.sin(phi), ct = Math.cos(th), st = Math.sin(th);
+  return [x, C[1] + r * (-cp * ct - sp * st), C[2] + r * (-cp * st + sp * ct)];
+}
+const tangentOf = (th) => [0, -Math.sin(th), Math.cos(th)];
+
+function hullOfPoints(points) {
+  const pts = points.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  if (pts.length < 3) return pts;
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower = [];
+  for (const p of pts) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+    lower.push(p);
+  }
+  const upper = [];
+  for (let i = pts.length - 1; i >= 0; i--) {
+    const p = pts[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
+    upper.push(p);
+  }
+  upper.pop();
+  lower.pop();
+  return lower.concat(upper);
+}
+
+function tubePath(th) {
+  const pts = [];
+  const T = tangentOf(th);
+  for (const r of [GEO.spot + 1, GEO.spot + 6]) {
+    const base = onRotor(th, r, Math.PI);
+    for (let i = 0; i < 16; i++) {
+      const a = (2 * Math.PI * i) / 16;
+      const p = base.map((v, j) => v + GEO.tubeR * (Math.cos(a) * (j === 0 ? 1 : 0) + Math.sin(a) * T[j]));
+      pts.push(toScreen(p));
+    }
+  }
+  return pathOf(hullOfPoints(pts), true);
+}
+
+function beamPath(th) {
+  const phiMax = Math.asin(GEO.img / GEO.det);
+  const tri = [onRotor(th, GEO.spot, Math.PI), onRotor(th, GEO.det, phiMax), onRotor(th, GEO.det, -phiMax)].map(toScreen);
+  return pathOf(tri, true);
+}
+
+const cellEls = Array.from({ length: CELLS }, () => {
+  const el = document.createElementNS("http://www.w3.org/2000/svg", "path");
+  el.setAttribute("class", "ct-cell");
+  cellsEl.appendChild(el);
+  return el;
+});
+
+function cellPath(th, index) {
+  const s0 = -GEO.img + index * CELL_W;
+  const s1 = s0 + CELL_W;
+  const phi0 = Math.asin(s0 / GEO.det), phi1 = Math.asin(s1 / GEO.det);
+  const pts = [];
+  for (const phi of [phi0, phi1]) {
+    for (const r of [GEO.det - 1.2, GEO.det + 1.2]) {
+      for (const x of [-3, 3]) pts.push(toScreen(onRotor(th, r, phi, x)));
+    }
+  }
+  return pathOf(hullOfPoints(pts), true);
+}
+
+function cellValue(row) {
+  const values = [];
+  const group = rows[0].length / CELLS;
+  for (let c = 0; c < CELLS; c++) {
+    let sum = 0;
+    for (let j = 0; j < group; j++) sum += rows[row][c * group + j];
+    values.push(sum / group / peak);
+  }
+  return values;
+}
+
+const sinoCtx = sinoCanvas.getContext("2d");
+const sinoImage = sinoCtx.createImageData(rows[0].length, rows.length);
+for (let i = 0; i < rows.length; i++) {
+  for (let j = 0; j < rows[i].length; j++) {
+    const o = (i * rows[i].length + j) * 4;
+    const v = Math.round(255 * Math.min(1, rows[i][j] / peak));
+    sinoImage.data[o] = v;
+    sinoImage.data[o + 1] = v;
+    sinoImage.data[o + 2] = v;
+    sinoImage.data[o + 3] = 255;
+  }
+}
+let sinoDrawn = -1;
+function drawSino(count) {
+  if (count === sinoDrawn) return;
+  sinoDrawn = count;
+  const data = new ImageData(new Uint8ClampedArray(sinoImage.data), sinoImage.width, sinoImage.height);
+  for (let i = count; i < rows.length; i++) {
+    for (let j = 0; j < rows[i].length; j++) data.data[(i * rows[i].length + j) * 4 + 3] = 0;
+  }
+  sinoCtx.putImageData(data, 0, 0);
+  sinoCount.textContent = String(count);
+}
+
+const reconCtx = reconCanvas.getContext("2d");
+const reconImage = reconCtx.createImageData(GRID, GRID);
+let recon = { count: 0, img: new Float64Array(GRID * GRID) };
+function reconTo(count) {
+  if (count < recon.count) recon = { count: 0, img: new Float64Array(GRID * GRID) };
+  for (; recon.count < count; recon.count++) backprojectAngle(recon.img, filtered[recon.count], recon.count);
+}
+let reconDrawn = -1;
+function windowed(hu) {
+  const lo = WINDOW.level - WINDOW.width / 2;
+  return Math.round(255 * Math.max(0, Math.min(1, (hu - lo) / WINDOW.width)));
+}
+function valueAt(col, row) {
+  const gain = recon.count ? N_ANG / recon.count : 1;
+  return huOf(recon.img[row * GRID + col] * gain);
+}
+function drawRecon(count) {
+  reconTo(count);
+  if (count === reconDrawn) return;
+  reconDrawn = count;
+  for (let row = 0; row < GRID; row++) {
+    for (let col = 0; col < GRID; col++) {
+      const o = (row * GRID + col) * 4;
+      const within = count > 0 && inside(col, row);
+      const v = within ? windowed(valueAt(col, row)) : 0;
+      reconImage.data[o] = v;
+      reconImage.data[o + 1] = v;
+      reconImage.data[o + 2] = v;
+      reconImage.data[o + 3] = within ? 255 : 0;
+    }
+  }
+  reconCtx.putImageData(reconImage, 0, 0);
+}
+
+function drawProfile(row, count) {
+  if (!count) {
+    profileLine.setAttribute("points", "");
+    return;
+  }
+  const pts = Array.from(rows[row], (v, j) => `${(j + 0.5).toFixed(2)},${(58 - (v / peak) * 54).toFixed(2)}`);
+  profileLine.setAttribute("points", pts.join(" "));
+}
+
+function tableShift(dx) {
+  const a = toScreen([dx, 0, 0]);
+  const b = toScreen([0, 0, 0]);
+  return [a[0] - b[0], a[1] - b[1]];
+}
+
+function drawRotor(s) {
+  const th = s.theta;
+  const on = s.beam;
+  beamEl.setAttribute("d", on > 0.001 ? beamPath(th) : "");
+  beamEl.style.opacity = on.toFixed(3);
+  tubeEl.setAttribute("d", tubePath(th));
+  const values = s.sinoCount ? cellValue(s.angleIndex) : cellValue(0);
+  cellEls.forEach((el, index) => {
+    el.setAttribute("d", cellPath(th, index));
+    const v = values[index];
+    el.style.opacity = (0.4 + 0.6 * Math.min(1, v * 1.25) * (on > 0.001 ? on : 0)).toFixed(3);
+  });
+  const [lx, ly] = toScreen(LED_AT);
+  ledEl.setAttribute("cx", lx.toFixed(2));
+  ledEl.setAttribute("cy", ly.toFixed(2));
+  ledEl.toggleAttribute("data-on", on > 0.5);
+}
+
+const probeAt = (x, y) => {
+  const col = ((x + 1) * GRID) / 2 - 0.5;
+  const row = ((1 - y) * GRID) / 2 - 0.5;
+  return { col, row };
+};
+let hover = null;
+function placeProbe(col, row) {
+  probeEl.hidden = false;
+  probeEl.style.left = `${((col + 0.5) / GRID) * 100}%`;
+  probeEl.style.top = `${((row + 0.5) / GRID) * 100}%`;
+}
+function describe(col, row, label) {
+  const hu = Math.round(valueAt(col, row) / 10) * 10;
+  huEl.textContent = `${label}${hu} HU, ${tissueOf(hu)}`;
+}
+
+let T = still.matches ? STARTS[4] + 2 : 0;
+let playing = !still.matches;
+const setPlaying = (on) => {
+  playing = on;
+  playBtn.textContent = on ? "Pause" : "Play";
+};
+setPlaying(playing);
+
+function layer(s) {
+  const inBore = s.dx > -20;
+  const tubeFront = depthOf(onRotor(s.theta, GEO.spot, Math.PI), P) > depthOf(C, P);
+  const back = tubeFront ? [] : [tubesEl];
+  const front = tubeFront ? [cellsEl, tubesEl] : [cellsEl];
+  if (inBore) {
+    slotA.replaceChildren(...back, topEl, ...front);
+    slotB.replaceChildren(colEl);
+  } else {
+    slotA.replaceChildren(...back, ...front);
+    slotB.replaceChildren(topEl, colEl);
+  }
+}
+
+function render(s) {
+  const [sx, sy] = tableShift(s.dx);
+  const shift = `translate(${sx.toFixed(2)} ${sy.toFixed(2)})`;
+  topEl.setAttribute("transform", shift);
+  colEl.setAttribute("transform", shift);
+  layer(s);
+  drawRotor(s);
+  drawSino(s.sinoCount);
+  drawRecon(s.reconCount);
+  drawProfile(s.angleIndex, s.sinoCount);
+  angleEl.textContent = `${s.degrees}°`;
+  readout.textContent = `${STAGES[s.stage].label} · ${s.degrees}° · table ${s.tableMm} mm out`;
+  stepBtns.forEach((btn, i) => btn.setAttribute("aria-pressed", String(i === s.stage)));
+  scrub.value = String(s.time);
+  scrub.setAttribute("aria-valuetext", STAGES[s.stage].label);
+  if (hover) {
+    placeProbe(hover.col, hover.row);
+    describe(hover.col, hover.row, "");
+  } else if (s.stage === 4 && reconCanvas) {
+    const { col, row } = probeAt(s.probe.x, s.probe.y);
+    placeProbe(Math.round(col), Math.round(row));
+    describe(Math.round(col), Math.round(row), `${s.probe.name}: `);
+  } else {
+    probeEl.hidden = true;
+    huEl.textContent = s.stage < 3 ? "The reconstruction starts after the scan." : "Hover the slice to read a value.";
+  }
+}
+
+reconWrap.addEventListener("pointermove", (event) => {
+  const rect = reconCanvas.getBoundingClientRect();
+  const col = Math.floor(((event.clientX - rect.left) / rect.width) * GRID);
+  const row = Math.floor(((event.clientY - rect.top) / rect.height) * GRID);
+  hover = col >= 0 && row >= 0 && col < GRID && row < GRID && inside(col, row) ? { col, row } : null;
+});
+reconWrap.addEventListener("pointerleave", () => {
+  hover = null;
+});
+
+playBtn.addEventListener("click", () => setPlaying(!playing));
+stepBtns.forEach((btn) => btn.addEventListener("click", () => {
+  T = STARTS[Number(btn.dataset.stage)] + 0.02;
+  setPlaying(false);
+  render(stateAt(T));
+}));
+scrub.addEventListener("input", () => {
+  T = Number(scrub.value);
+  setPlaying(false);
+  render(stateAt(T));
+});
+root.addEventListener("keydown", (event) => {
+  if (event.key === " ") {
+    event.preventDefault();
+    setPlaying(!playing);
+  }
+});
+
+let last = performance.now();
+function tick(now) {
+  const dt = Math.min(0.1, (now - last) / 1000);
+  last = now;
+  if (playing) T = (T + dt) % TOTAL;
+  render(stateAt(T));
+  requestAnimationFrame(tick);
+}
+render(stateAt(T));
+requestAnimationFrame(tick);
+</script></body></html>
