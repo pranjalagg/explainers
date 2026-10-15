@@ -16,6 +16,7 @@ export const FEED = {
   inkGap: 0.15,       // mm
   airGap: 0.5,        // mm
   buffer: 6,          // uL, held between the fins when they are full
+  bare: 0.4,          // uL, what clings to a feed with no fins
   supply: 0.35,       // uL/s, what the ink channel delivers with no vacuum behind it
 };
 export const slotPressure = (gap) => (2 * INK.gamma) / (gap * 1e-3);
@@ -55,8 +56,12 @@ export function nibAt(pressure) {
 }
 
 export const initial = () => ({
-  pressure: 40, speed: 30, vented: true,
-  buffer: FEED.buffer,     // uL held between the fins
+  pressure: 40, speed: 30, vented: true, fins: true,
+  heat: 0,                 // K, how much warmer the hand is making the pen
+  dT: 0,                   // K, how much warmer it has got
+  leak: 0,                 // uL pushed out with nowhere to go, not yet drawn on the paper
+  leaked: 0,
+  buffer: FEED.buffer,     // uL held in the feed
   vac: 0,                  // Pa below atmosphere inside the reservoir
   drawn: 0,                // uL that has left the reservoir
   sinceBurp: 0,            // uL drawn since the last bubble
@@ -72,15 +77,30 @@ export const initial = () => ({
 // One step of dt seconds. Returns how many bubbles the air channel passed (0 or 1).
 export function step(s, dt, width) {
   const w = width ?? nibAt(s.pressure).width;      // the line's width: the tipping plus however far the tines have opened
+  const cap = s.fins ? FEED.buffer : FEED.bare;
+  // A warmer pen: the air above the ink expands by dT / T and pushes that much ink into the feed. Cooling draws it back.
+  const before = s.dT;
+  s.dT += clamp(s.heat - s.dT, -0.8 * dt, 0.8 * dt);
+  const expand = (AIR_POCKET * (s.dT - before)) / 293;
+  if (expand > 0) {
+    s.buffer += expand;
+    s.drawn += expand;
+    if (s.buffer > cap) { s.leak += s.buffer - cap; s.leaked += s.buffer - cap; s.buffer = cap; }
+  } else if (expand < 0) {
+    const back = Math.min(s.buffer, -expand);
+    s.buffer -= back;
+    s.drawn -= back;
+  }
+  s.buffer = Math.min(s.buffer, cap);
   const demand = w * s.speed * INK.film;                          // uL/s the paper pulls out
   const supply = FEED.supply * Math.max(0, 1 - s.vac / P_INK);            // uL/s the ink channel can deliver
   const want = demand * dt;
   // The fins only take what they have room for once the paper has had its share.
-  const room = Math.max(0, FEED.buffer - s.buffer + want);
+  const room = Math.max(0, cap - s.buffer + want);
   const inflow = Math.min(supply * dt, room);
   const have = s.buffer + inflow;
   const out = Math.min(want, have);
-  s.buffer = have - out;
+  s.buffer = Math.min(cap, have - out);
   const fed = want > 0 ? out / want : 1;
   s.fed += (fed - s.fed) * Math.min(1, dt / 0.12);
   s.demand = demand;

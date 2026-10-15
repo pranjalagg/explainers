@@ -36,6 +36,8 @@ const traceEls = [...svg.querySelectorAll("[data-trace-b]")];
 const holesEl = q("[data-holes-path]");
 const spokesEls = { take: q('[data-spokes="take"]'), feed: q('[data-spokes="feed"]') };
 const weightEls = [...svg.querySelectorAll("[data-weight]")];
+const finsCover = q("[data-fins-cover]");
+const blotsEl = q("[data-blots]");
 
 const ui = {
   play: document.querySelector("[data-play]"),
@@ -44,6 +46,9 @@ const ui = {
   speed: document.querySelector("[data-speed]"),
   speedOut: document.querySelector("[data-speed-out]"),
   vent: document.querySelector("[data-vent]"),
+  fins: document.querySelector("[data-fins]"),
+  warm: document.querySelector("[data-warm]"),
+  heatNote: document.querySelector("[data-heat-note]"),
   width: document.querySelector("[data-width]"),
   widthLine: document.querySelector("[data-width-line]"),
   widthNote: document.querySelector("[data-width-note]"),
@@ -77,6 +82,7 @@ let touring = !still.matches;
 let tourClock = 0;
 let ventByTour = false;
 let lastSeg = null;
+let blots = [];
 let visible = false, frame = 0, last = 0, idleTimer = 0;
 const plugShown = { v: 0 };
 const appear = weightEls.map(() => 0);
@@ -123,8 +129,9 @@ function drawNib() {
 
 // ---------- ink in the pen ----------
 function drawInk() {
-  const frac = clampN(sim.buffer / FEED.buffer, 0, 1);
+  const frac = sim.fins ? clampN(sim.buffer / FEED.buffer, 0, 1) : 0;
   const n = slotEls.length;
+  finsCover.style.display = sim.fins ? "none" : "";
   slotEls.forEach((el, i) => {
     const fill = clampN(frac * n - (n - 1 - i), 0, 1);
     el.setAttribute("d", fill > 0.02 ? stPath(slotInk(i, fill), true) : "");
@@ -227,6 +234,20 @@ function drawTrace() {
     traceEls[i].setAttribute("d", d);
   });
 }
+function addBlot(volume) {
+  const last = blots[blots.length - 1];
+  if (last && tape - last.u < 0.5) last.v += volume;
+  else blots.push({ u: tape, v: volume });
+}
+function drawBlots() {
+  const tx = tipX();
+  const d = blots.map((b) => {
+    const x = tx - (tape - b.u) * U;
+    const r = Math.sqrt(b.v / (Math.PI * 0.2)) * U;
+    return pathOf(Array.from({ length: 28 }, (_, i) => toScreen([x + r * Math.cos((i / 28) * Math.PI * 2), r * Math.sin((i / 28) * Math.PI * 2), PZ + 0.06])), true);
+  }).join("");
+  blotsEl.setAttribute("d", d);
+}
 function pushTrace() {
   if (lastU < 0 || tape - lastU >= 0.5) {
     hist.push({ u: tape, w: sim.width, a: sim.fed });
@@ -307,6 +328,8 @@ function advance(dt, calm) {
   if (!paused) {
     const made = step(sim, dt, sim.width);
     for (let i = 0; i < made; i++) spawnBubble();
+    if (sim.leak > 0.01) { addBlot(sim.leak); sim.leak = 0; }
+    blots = blots.filter((b) => tipX() - (tape - b.u) * U > XMIN - 30);
     const moved = sim.speed * dt;
     tape += moved;
     reel += moved * U / R_ROLL;
@@ -325,6 +348,7 @@ function draw(dt) {
   drawFlow(dt);
   drawBubbles(dt);
   drawTrace();
+  drawBlots();
   drawHoles();
   drawReels();
   plugEl.style.opacity = plugShown.v.toFixed(2);
@@ -365,6 +389,13 @@ function drawPanel() {
   ui.vacNote.textContent = sim.vented
     ? `A bubble gets in at ${Math.round(P_AIR)} Pa, about every ${(BURP_VOLUME).toFixed(2)} µL of ink`
     : `Air channel sealed: suction climbs toward ${Math.round(P_INK)} Pa and the feed stops pulling`;
+  ui.fins.setAttribute("aria-pressed", String(!sim.fins));
+  ui.fins.textContent = sim.fins ? "Remove the fins" : "Put the fins back";
+  ui.warm.setAttribute("aria-pressed", String(sim.heat > 0));
+  ui.warm.textContent = sim.heat > 0 ? "Let the pen cool" : "Warm the pen (+4 K)";
+  ui.heatNote.textContent = sim.dT > 0.05 || sim.leaked > 0.01
+    ? `Pen ${sim.dT.toFixed(1)} K warmer: the air in the cartridge has pushed ${(AIR_POCKET * sim.dT / 293).toFixed(1)} µL into the feed${sim.leaked > 0.01 ? `, and ${sim.leaked.toFixed(1)} µL had nowhere to go` : ""}`
+    : `Room for ${(Math.max(0, (sim.fins ? FEED.buffer : FEED.bare) - sim.buffer)).toFixed(1)} µL more in the feed`;
   ui.pressureOut.textContent = `${pressureOf()} gf`;
   ui.speedOut.textContent = `${Math.round(sim.speed)} mm/s`;
   ui.play.textContent = paused ? "Write" : "Pause";
@@ -404,7 +435,7 @@ function quiet() {
   touring = false;
   if (ventByTour) { sim.vented = true; ventByTour = false; }
   clearTimeout(idleTimer);
-  idleTimer = setTimeout(() => { touring = !still.matches && !paused && sim.vented; tourClock = 0; lastSeg = null; run(); }, 3600);
+  idleTimer = setTimeout(() => { touring = !still.matches && !paused && sim.vented && sim.fins && sim.heat === 0; tourClock = 0; lastSeg = null; run(); }, 3600);
 }
 
 // ---------- input ----------
@@ -420,6 +451,8 @@ root.addEventListener("keydown", (event) => {
   if (event.key === "End") { event.preventDefault(); setWeights(WEIGHT_N); return; }
   if (event.key === " ") { event.preventDefault(); togglePlay(); return; }
   if (event.key === "v" || event.key === "V") { toggleVent(); return; }
+  if (event.key === "f" || event.key === "F") { toggleFins(); return; }
+  if (event.key === "w" || event.key === "W") { toggleWarm(); return; }
   if (event.key === "+" || event.key === "=") { sim.speed = Math.min(SPEED.max, sim.speed + 10); quiet(); run(); return; }
   if (event.key === "-") { sim.speed = Math.max(SPEED.min, sim.speed - 10); quiet(); run(); }
 });
@@ -435,6 +468,19 @@ function toggleVent() {
   sim.vented = next;
   run();
 }
+function toggleFins() {
+  sim.fins = !sim.fins;
+  quiet();
+  run();
+}
+function toggleWarm() {
+  sim.heat = sim.heat ? 0 : 4;
+  if (sim.heat) sim.speed = 0;                 // the pen is resting in a warm hand
+  quiet();
+  run();
+}
+ui.fins.addEventListener("click", toggleFins);
+ui.warm.addEventListener("click", toggleWarm);
 ui.play.addEventListener("click", togglePlay);
 ui.vent.addEventListener("click", toggleVent);
 ui.pressure.addEventListener("input", () => setWeights(Number(ui.pressure.value)));

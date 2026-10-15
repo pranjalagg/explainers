@@ -5,11 +5,17 @@
 // The pen leans back at TILT with its tip on the paper. Shared by the build and the live page.
 import { U, CART } from "./model.mjs";
 
-export const TILT = (55 * Math.PI) / 180;
-const SIN = Math.sin(TILT);
-const COS = Math.cos(TILT);
-export const AX = [-COS, 0, SIN];      // from the tip toward the rear, in the world
-export const NM = [SIN, 0, COS];       // across the axis, toward the nib's top side
+// The pose: how far the pen leans, and which way its rear points (dir 1: toward -x, dir -1: toward +x).
+export let TILT, SIN, COS, DIR, AX, NM;
+export function setPose(deg, dir = 1) {
+  TILT = (deg * Math.PI) / 180;
+  SIN = Math.sin(TILT);
+  COS = Math.cos(TILT);
+  DIR = dir;
+  AX = [-dir * COS, 0, SIN];           // from the tip toward the rear, in the world
+  NM = [dir * SIN, 0, COS];            // across the axis, toward the nib's top side
+}
+setPose(55, 1);
 
 export const LEN = 86;
 
@@ -60,13 +66,14 @@ export const curlAt = (s) => (s >= 4 ? 0 : -CURL * Math.pow(1 - s / 4, 2));
 
 // The pen frame, placed so that the tipping's lowest point is at `contact` (world) when the nib carries no load.
 export function penFrame(contact) {
+  const ax = AX, nm = NM, sin = SIN, cos = COS;
   const centre = { s: TIP.s, t: NIB_UNDER + curlAt(TIP.s) - 0.15 };
-  const sC = centre.s - TIP.r * SIN;
-  const tC = centre.t - TIP.r * COS;
+  const sC = centre.s - TIP.r * sin;
+  const tC = centre.t - TIP.r * cos;
   const w = (s, t, y = 0) => [
-    contact[0] + ((s - sC) * AX[0] + (t - tC) * NM[0]) * U,
+    contact[0] + ((s - sC) * ax[0] + (t - tC) * nm[0]) * U,
     contact[1] + y * U,
-    contact[2] + ((s - sC) * AX[2] + (t - tC) * NM[2]) * U,
+    contact[2] + ((s - sC) * ax[2] + (t - tC) * nm[2]) * U,
   ];
   return { w, sC, tC, centre };
 }
@@ -93,6 +100,22 @@ export function clipBelow(poly, level) {
     const b = poly[(i + 1) % poly.length];
     const fa = level - upOf(a[0], a[1]);
     const fb = level - upOf(b[0], b[1]);
+    if (fa >= 0) out.push(a);
+    if ((fa >= 0) !== (fb >= 0)) {
+      const k = fa / (fa - fb);
+      out.push([a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k]);
+    }
+  }
+  return out;
+}
+// The part above the plane: the air pocket above the ink.
+export function clipAbove(poly, level) {
+  const out = [];
+  for (let i = 0; i < poly.length; i++) {
+    const a = poly[i];
+    const b = poly[(i + 1) % poly.length];
+    const fa = upOf(a[0], a[1]) - level;
+    const fb = upOf(b[0], b[1]) - level;
     if (fa >= 0) out.push(a);
     if ((fa >= 0) !== (fb >= 0)) {
       const k = fa / (fa - fb);
@@ -349,6 +372,50 @@ export function nibGeometry(spread, lift) {
   }
   const tip = [TIP.s, NIB_UNDER + curlAt(TIP.s) + bendAt(TIP.s, lift) - 0.15];
   return { strips, outline, slitEdge, plate, tip };
+}
+
+// The whole nib turned about its own axis by `roll`, so its top faces the viewer: both tines, the slit and the breather hole.
+// Strips carry the pen-frame normal of the arch they lie on, rotated the same way, so the caller can shade them.
+export function nibFace(roll) {
+  const c = Math.cos(roll);
+  const sn = Math.sin(roll);
+  const rot = ([s, t, y]) => [s, t * c - y * sn, y * c + t * sn];
+  const gap = 0.09;
+  const rows = [];
+  for (let s = 0.15; s < S_PLATE_END; s += s < 12 ? 0.35 : 1.6) rows.push(s);
+  rows.push(S_PLATE_END);
+  const half = (s) => (s > 12 ? 3.0 : nibWidth(s));
+  const at = (s, sgn, k) => {
+    const rest = gap + k * (half(s) - gap);
+    const t = Math.sqrt(Math.max(0, TOP_R * TOP_R - rest * rest)) + curlAt(s);
+    const y = sgn * Math.max(rest, s > BREATHER.s - BREATHER.r && s < BREATHER.s + BREATHER.r ? gap + holeEdge(s) : 0);
+    return { p: rot([s, t, y]), n: rot([0, t / TOP_R, (sgn * rest) / TOP_R]) };
+  };
+  const cuts = [0, 0.3, 0.55, 0.78, 1];
+  const strips = [];
+  for (const sgn of [-1, 1]) {
+    for (let i = 0; i < cuts.length - 1; i++) {
+      const near = rows.map((s) => at(s, sgn, cuts[i]));
+      const far = rows.map((s) => at(s, sgn, cuts[i + 1])).reverse();
+      const mid = at(rows[Math.floor(rows.length / 3)], sgn, (cuts[i] + cuts[i + 1]) / 2);
+      strips.push({ pts: [...near, ...far].map((q) => q.p), normal: mid.n });
+    }
+  }
+  const outerSide = (sgn) => rows.map((s) => at(s, sgn, 1).p);
+  const outline = [...outerSide(-1), ...outerSide(1).reverse()];
+  const hole = Array.from({ length: 18 }, (_, i) => {
+    const a = (i / 18) * Math.PI * 2;
+    const y = BREATHER.r * Math.sin(a);
+    return rot([BREATHER.s + BREATHER.r * Math.cos(a), Math.sqrt(TOP_R * TOP_R - y * y), y]);
+  });
+  const slit = [...rows.filter((s) => s < BREATHER.s).map((s) => at(s, -1, 0).p), ...rows.filter((s) => s < BREATHER.s).reverse().map((s) => at(s, 1, 0).p)];
+  const tips = [-1, 1].map((sgn) => Array.from({ length: 14 }, (_, i) => {
+    const a = (i / 14) * Math.PI * 2;
+    const y = sgn * (gap + 0.4) + TIP.r * 0.8 * Math.sin(a);
+    return rot([TIP.s + TIP.r * 0.8 * Math.cos(a), Math.sqrt(Math.max(0, TOP_R * TOP_R - y * y)) + curlAt(TIP.s) - 0.1, y]);
+  }));
+  const shoulders = [-1, 1].map((sgn) => rows.filter((s) => s > 6 && s < 14).map((s) => at(s, sgn, 1).p));
+  return { strips, outline, hole, slit, tips, shoulders };
 }
 
 // The ink that fills the gap under the nib from `front` (mm from the tip) back to the collector.

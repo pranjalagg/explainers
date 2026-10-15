@@ -6,6 +6,8 @@ import * as G from "../kit/lathe.mjs";
 import { kitScript } from "../kit/inline.mjs";
 import * as M from "./model.mjs";
 import * as Pen from "./pen.mjs";
+import { buildPen, ORDER } from "./pen-art.mjs";
+import { PARTS, ORDER_APART } from "./parts-text.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const theme = process.argv.includes("--dark") ? "dark" : "light";
@@ -105,7 +107,7 @@ function bed() {
   const tape = { x: -SPOOL_X, y: -TAPE_W / 2, w: 2 * SPOOL_X, d: TAPE_W, r: 0.3 };
   out.push(S(k.slabOf(tape, PZ - 0.8, 0.8, P, 2, 0.2), { tone: "hi", crease: "lo", className: "fp-paper" }));
   out.push(`<path class="fp-hole" data-holes-path d=""/>`);
-  out.push(`<g data-trace>${[0, 1, 2, 3, 4, 5].map((i) => `<path class="fp-trace" data-trace-b="${i}" style="fill-opacity:${(0.2 + 0.8 * (i / 5)).toFixed(2)}" d=""/>`).join("")}</g>`);
+  out.push(`<g data-trace>${[0, 1, 2, 3, 4, 5].map((i) => `<path class="fp-trace" data-trace-b="${i}" style="fill-opacity:${(0.2 + 0.8 * (i / 5)).toFixed(2)}" d=""/>`).join("")}<path class="fp-trace" data-blots style="fill-opacity:.92" d=""/></g>`);
   return out.join("");
 }
 
@@ -183,103 +185,8 @@ function carrier() {
 }
 
 // ---------- the pen ----------
-// Turned shell pieces, drawn as the half behind the cut plane: the whole body, clipped to the hull of its back half.
-const F_PEN = G.frameOf(FR.w(0, 0, 0), Pen.AX, Pen.NM, [0, -1, 0]);
-let clipId = 0;
-function halfBody(paths, rOf, s0, s1, tone) {
-  const id = `fp-half-${clipId++}`;
-  const pts = [];
-  const n = 40;
-  for (let i = 0; i <= n; i++) {
-    const s = s0 + ((s1 - s0) * i) / n;
-    const r = Math.max(0.01, rOf(s));
-    for (let j = 0; j <= 28; j++) pts.push(at(G.pointOf(F_PEN, s * U, r * U, (Math.PI * j) / 28)));
-  }
-  const hull = k.pathOf(G.hullOf(pts), true);
-  return `<clipPath id="${id}"><path d="${hull}"/></clipPath><g clip-path="url(#${id})">${S({ ...paths, outline: "" }, { tone })}</g>${L(hull, { tone, className: "iso-edge" })}`;
-}
-
-function shell() {
-  const out = [];
-  const capKnots = [];
-  for (let i = 0; i <= 22; i++) {
-    const s = Pen.S_CAP + (Pen.LEN - Pen.S_CAP) * (1 - Math.pow(1 - i / 22, 1.6));
-    capKnots.push(i === 22 ? [Pen.LEN * U, 0] : [s * U, Pen.capR(s) * U, i > 0 ? 1 : 0]);
-  }
-  const capPaths = G.solidOf(capKnots, F_PEN, P, { smooth: { slope: (s) => Pen.capSlope(s / U) } });
-  out.push(halfBody(capPaths, Pen.capR, Pen.S_CAP, Pen.LEN, "hi"));
-  out.push(halfBody(G.disc(Pen.S_RING * U, Pen.S_CAP * U, Pen.R_BAR * U, F_PEN, P), () => Pen.R_BAR, Pen.S_RING, Pen.S_CAP, "hi"));
-  out.push(halfBody(G.disc(Pen.S_JOINT * U, Pen.S_RING * U, Pen.R_RING * U, F_PEN, P, { bevel: 0.4 }), () => Pen.R_RING, Pen.S_JOINT, Pen.S_RING, "hi"));
-  const gk = [];
-  for (let i = 0; i <= 22; i++) {
-    const s = Pen.S_FRONT + ((Pen.S_FLARE - Pen.S_FRONT) * i) / 22;
-    gk.push([s * U, Pen.flareR(s) * U, i > 0 ? 1 : 0]);
-  }
-  gk.push([Pen.S_JOINT * U, Pen.R_GRIP * U, 0]);
-  const gripPaths = G.solidOf(gk, F_PEN, P, { smooth: { slope: (s) => Pen.flareSlope(s / U) } });
-  out.push(halfBody(gripPaths, (s) => (s < Pen.S_FLARE ? Pen.flareR(s) : Pen.R_GRIP), Pen.S_FRONT, Pen.S_JOINT, "hi"));
-  return out.join("");
-}
-
-// The whole sectioned pen at the cut plane, as a backing, so nothing behind shows through a gap.
-function outlinePoly() {
-  const up = [];
-  for (let s = Pen.S_FRONT; s <= Pen.S_FLARE; s += 1) up.push([s, Pen.flareR(s)]);
-  up.push([Pen.S_JOINT, Pen.R_GRIP], [Pen.S_JOINT, Pen.R_RING], [Pen.S_RING, Pen.R_RING], [Pen.S_RING, Pen.R_BAR], [Pen.S_CAP, Pen.R_BAR]);
-  for (let s = Pen.S_CAP; s <= Pen.LEN; s += 0.5) up.push([s, Pen.capR(s)]);
-  return [...up, ...up.slice().reverse().map(([s, t]) => [s, -t])];
-}
-
-const cutFill = (pts, cls) => `<path class="fp-cut ${cls}" d="${stPoly(pts)}"/>`;
-const cutEdge = (pts, tone = "hi") => L(stPoly(pts), { tone });
-
-function cutParts() {
-  const out = [];
-  out.push(cutFill(outlinePoly(), "fp-void"));
-  // The barrel's far wall seen from inside, a soft gradient across the bore.
-  const g0 = stPt([60, -Pen.R_BAR_IN]);
-  const g1 = stPt([60, Pen.R_BAR_IN]);
-  out.push(`<defs><linearGradient id="fp-wall" gradientUnits="userSpaceOnUse" x1="${f1(g0[0])}" y1="${f1(g0[1])}" x2="${f1(g1[0])}" y2="${f1(g1[1])}"><stop offset="0" style="stop-color:var(--anatomy-shade-0)"/><stop offset=".5" style="stop-color:var(--anatomy-shade-3)"/><stop offset="1" style="stop-color:var(--anatomy-shade-1)"/></linearGradient></defs>`);
-  out.push(`<path class="fp-wall" d="${stPoly(Pen.rect(Pen.S_JOINT, Pen.S_CAP, -Pen.R_BAR_IN, Pen.R_BAR_IN))}"/>`);
-
-  const grip = Pen.gripWall();
-  for (const wall of [grip, Pen.mirrorT(grip)]) out.push(cutFill(wall, "fp-resin"), cutEdge(wall));
-  const bar = Pen.barrelWall();
-  for (const wall of [bar, Pen.mirrorT(bar)]) out.push(cutFill(wall, "fp-resin"), cutEdge(wall));
-  const cap = Pen.endCap();
-  out.push(cutFill(cap, "fp-resin"), cutEdge(cap));
-  out.push(L(Pen.threads().map((pts) => stPath(pts)).join(""), { tone: "lo" }));
-
-  // Cartridge: shell, the inside wall, ink below the free surface, and the rubber plug the pin goes through.
-  const shellPoly = Pen.cartridgeShell();
-  out.push(cutFill(shellPoly, "fp-cart"), cutEdge(shellPoly, "mid"));
-  out.push(`<path class="fp-wall" d="${stPoly(Pen.cartridgeInterior())}"/>`, cutEdge(Pen.cartridgeInterior(), "faint"));
-  out.push(`<path class="fp-ink" data-ink-cart d=""/>`);
-  out.push(`<path class="iso-line" data-tone="mid" data-surface d=""/>`);
-  out.push(cutFill(Pen.plug(), "fp-plug"), cutEdge(Pen.plug(), "mid"));
-
-  // Feed: the body with its comb and pin, then the voids and the ink that sits in them.
-  const feed = Pen.feedShape();
-  out.push(cutFill(feed, "fp-feed"), cutEdge(feed));
-  out.push(cutFill(Pen.airTunnel(), "fp-void"), cutEdge(Pen.airTunnel(), "faint"));
-  out.push(cutFill(Pen.collector(), "fp-void"));
-  out.push(cutFill(Pen.inkLumen(), "fp-void"), `<path class="fp-ink" d="${stPoly(Pen.inkLumen())}"/>`);
-  out.push(`<path class="fp-ink" d="${stPoly(Pen.collector())}"/>`);
-  Pen.slots().forEach((slot, i) => out.push(cutFill(slot, "fp-void"), `<path class="fp-ink" data-slot="${i}" d=""/>`));
-  out.push(`<path class="fp-ink" data-channel d=""/>`);
-  out.push(`<path class="fp-flow" data-flow-line d="${stPath(Pen.FLOW_PATH)}"/>`);
-  const plugBox = Pen.rect(24, 28.6, Pen.AIR.t0, Pen.AIR.t1);
-  out.push(`<g data-plug>${cutFill(plugBox, "fp-plug")}${cutEdge(plugBox, "mid")}</g>`);
-  out.push(`<g data-bubbles></g>`);
-
-  // The nib: a plate cut behind the breather hole and the far tine past it. Both are redrawn as the nib flexes.
-  out.push(`<g data-nib><path class="fp-cut fp-nib" data-plate-fill d=""/><path class="iso-line" data-tone="lit" data-plate-edge d=""/>${[0, 1, 2, 3].map((i) => `<path class="fp-tine" data-strip="${i}" data-t="${3 - i}" d=""/>`).join("")}<path class="iso-line" data-tone="lit" data-tine-line d=""/><circle class="fp-tip" data-tip cx="0" cy="0" r="1.6"/></g>`);
-  return out.join("");
-}
-
-function pen() {
-  return `<g id="fp-pen" data-pen>${shell()}${cutParts()}</g>`;
-}
+const rig = buildPen({ FR, P, idp: "fp1", live: true });
+const pen = () => `<g id="fp-pen" data-pen>${ORDER.map((name) => `<g data-part="${name}">${rig.parts[name].svg}</g>`).join("")}</g>`;
 
 // ---------- the loupe ----------
 const F_LENS = yFrame([LENS.x, LENS.y, LENS.z]);
@@ -333,6 +240,142 @@ const svg = k.figureSvg({
   body,
 });
 
+// ---------- Fig 2: the pen taken apart ----------
+const APART = {
+  nib: { s: -40, t: 14 },
+  feed: { s: -40, t: 0 },
+  section: { s: 0, t: 0 },
+  cartridge: { s: 9, t: 0 },
+  barrel: { s: 54, t: 0 },
+  cap: { s: 62, t: 0 },
+};
+Pen.setPose(28, -1);
+const W2 = 640;
+const H2 = 400;
+const FR2 = Pen.penFrame([0, 0, 52]);
+const shift2 = (name) => {
+  const o = APART[name];
+  return [(o.s * Pen.AX[0] + o.t * Pen.NM[0]) * U, 0, (o.s * Pen.AX[2] + o.t * Pen.NM[2]) * U];
+};
+const PLATE2 = { x: -190, y: -58, w: 710, d: 116, r: 8 };
+const provisional = buildPen({ FR: FR2, P: { origin: [0, 0], scale: 1, azimuth: 60, elevation: 30 }, idp: "tmp", live: false });
+const extent = [];
+for (const name of ORDER) {
+  const [dx, , dz] = shift2(name);
+  for (const [s, t] of provisional.parts[name].poly) {
+    for (const f of [0, 1]) {
+      const p = FR2.w(s, t, 0);
+      extent.push([p[0] + dx * f, p[1] - 24, p[2] + dz * f], [p[0] + dx * f, p[1] + 0, p[2] + dz * f]);
+    }
+  }
+}
+const base2 = k.boxCorners(PLATE2, -PLATE_H - FOOT_H, 0);
+const P2 = k.fitProjection([...extent, ...base2], W2, H2, { pad: 22, azimuth: 60, elevation: 30 });
+const at2 = (p) => k.iso(p, P2);
+const art2 = buildPen({ FR: FR2, P: P2, idp: "fp2", live: false });
+
+function base2Svg() {
+  const out = [`<path class="iso-halo" d="${k.haloOf(PLATE2, -PLATE_H - FOOT_H, PLATE_H, P2)}"/>`];
+  const feet = k.corners(PLATE2, 22).sort((a, b) => k.depthOf([a[0], a[1], 0], P2) - k.depthOf([b[0], b[1], 0], P2));
+  for (const [x, y] of feet) {
+    out.push(S(k.cylinder(x, y, 7, -PLATE_H - FOOT_H, 1.6, P2, 28), { tone: "lo" }));
+    out.push(S(k.cylinder(x, y, 5.4, -PLATE_H - FOOT_H + 1.6, FOOT_H - 1.6, P2, 28), { tone: "mid" }));
+  }
+  out.push(S(k.slabOf(PLATE2, -PLATE_H, PLATE_H, P2, 8, 1.6), { tone: "mid", inner: L(k.sideSeam(PLATE2, -PLATE_H + 3.5, P2, 8), { tone: "faint" }) }));
+  out.push(L(k.planOutline(k.insetPlan(PLATE2, 5), 0, P2), { tone: "lo" }));
+  const screws = k.corners(PLATE2, 10);
+  out.push(D(screws.map(([x, y]) => at2([x, y, 0])), { size: 0.5 }));
+  const strip2 = { x: -160, y: 36, w: 650, d: 8, r: 1 };
+  out.push(S(k.slabOf(strip2, 0, 0.8, P2, 3), { tone: "lo", crease: "none" }));
+  const ticks2 = k.topTicks(strip2.x + 6, strip2.x + strip2.w - 6, U * 5, 4, strip2.y + 0.01, 0.8, [2.2, 4], P2);
+  out.push(L(ticks2.minor, { tone: "lo" }), L(ticks2.major, { tone: "mid" }));
+  return out.join("");
+}
+
+const shadows = ORDER.map((name) => {
+  const pts = art2.parts[name].poly.map(([s, t]) => {
+    const w = FR2.w(s, t, 0);
+    return at2([w[0], w[1], 0.2]);
+  });
+  const hull = k.pathOf(G.hullOf(pts), true);
+  const [dx, dy] = k.axisVector(P2, [shift2(name)[0], 0, 0]);
+  const [fx, fy] = [dx, dy];
+  return { name, hull, vec: [fx, fy] };
+});
+const apartVec = Object.fromEntries(ORDER.map((name) => [name, k.axisVector(P2, shift2(name))]));
+const boxes = {};
+for (const name of ORDER) {
+  const box = (f) => {
+    const [dx, dy] = apartVec[name];
+    const part = art2.parts[name];
+    const pts = name === "nib" && f > 0.5 ? part.faceScreen : part.poly.flatMap(([s, t]) => [0, -Pen.R_BAR * 0.5, -Pen.R_BAR].map((y) => at2(FR2.w(s, t, y))));
+    const xs = pts.map((p) => p[0] + dx * f);
+    const ys = pts.map((p) => p[1] + dy * f);
+    return [Math.min(...xs), Math.min(...ys), Math.max(...xs), Math.max(...ys)];
+  };
+  boxes[name] = { closed: box(0), open: box(1) };
+}
+
+const body2 = [
+  base2Svg(),
+  shadows.map((s) => `<g data-shadow="${s.name}"><path class="iso-halo fp-shadow" d="${s.hull}"/></g>`).join(""),
+  ORDER.map((name) => `<g data-part="${name}" class="fp-part">${art2.parts[name].svg}</g>`).join(""),
+].join("");
+const svg2 = k.figureSvg({
+  width: W2,
+  height: H2,
+  label: "The fountain pen taken apart along its axis: nib, feed, section, cartridge, barrel and end cap, drawn cut open so the inside of each part shows. Select a part to zoom in and read what it does.",
+  body: body2,
+  className: "fp-x",
+});
+const DATA2 = { W: W2, H: H2, apart: apartVec, boxes, shadows: Object.fromEntries(shadows.map((s) => [s.name, s.vec])), order: ORDER, text: PARTS, list: ORDER_APART };
+
+const plate2 = k.plateHtml({
+  fig: "Fig 2",
+  title: "Taken apart",
+  hint: "Select a part to zoom in",
+  readout: "All six parts",
+  keys: [
+    { mark: "lit", label: "Nib" },
+    { mark: "raised", label: "Feed, section, barrel, cap and cartridge shell" },
+    { mark: "flat", label: "Ink" },
+  ],
+  caption:
+    "The same pen, pulled apart along its axis in the order you would take it apart: the nib and feed come out of the front of the section, the barrel unscrews and slides back off the cartridge, and the end cap comes away last. Every part is cut along the same plane as above. Select one to zoom in and read what it does and why the pen needs it.",
+  body: `<div class="fp-x-stage" tabindex="0" role="group" aria-label="Exploded fountain pen">${svg2}</div>`,
+});
+
+const EXPLORER = `
+<section class="fp-explorer" aria-label="Parts of the pen">
+  <div class="fp-controls">
+    <button type="button" class="fp-btn" data-blast aria-pressed="true">Assemble</button>
+    <button type="button" class="fp-btn" data-overview>All parts</button>
+  </div>
+  <div class="fp-picker" role="group" aria-label="Choose a part">${ORDER_APART.map((name, i) => `<button type="button" class="fp-pick" data-pick="${name}" aria-pressed="false"><span>0${i + 1}</span>${PARTS[name].name}</button>`).join("")}</div>
+  <article class="fp-info" aria-live="polite">
+    <h3 data-info-title></h3>
+    <p class="fp-role" data-info-role></p>
+    <p data-info-body></p>
+    <div class="fp-chips" data-info-chips></div>
+    <p class="fp-feature" data-info-feature></p>
+    <ul class="fp-facts" data-info-facts></ul>
+  </article>
+</section>`;
+
+const HOW = `
+<section class="fp-how" aria-label="How a fountain pen works">
+  <h2>How it works</h2>
+  <ol>
+    <li><b>The pin opens the cartridge.</b> The feed ends in a hollow pin that pierces the cartridge's plug. It gives ink a way out and air a way in.</li>
+    <li><b>Capillary action draws ink forward.</b> Along the feed's ink channel the gap is only ${M.FEED.inkGap} mm, and a gap that small pulls liquid with about ${Math.round(M.P_INK)} Pa, enough to lift ink against gravity.</li>
+    <li><b>The paper takes it from the nib.</b> The slit carries ink to the tipping. Paper pores, about 10 µm across, pull with about ${Math.round(M.P_PAPER)} Pa, far harder than the slit, so ink moves into the page as the nib drags over it.</li>
+    <li><b>Air has to come back.</b> Every microlitre of ink that leaves thins the air above the ink, so the pressure in the cartridge falls. At ${Math.round(M.P_AIR)} Pa below the room a bubble forces in at the breather hole, runs back along the wider air channel and rises to the top of the cartridge. Seal that channel and the suction builds toward ${Math.round(M.P_INK)} Pa until the feed can no longer pull.</li>
+    <li><b>The fins are a reserve and a catch basin.</b> The channel delivers at most ${M.FEED.supply} µL/s, so a bold, fast stroke would starve; the fins hold about ${M.FEED.buffer} µL to draw on and refill when you pause. They also soak up the ink that a warming cartridge pushes forward, instead of letting it blot the page.</li>
+    <li><b>The nib flexes.</b> Press and the two tines spread, the slit opens and the line gets wider, ${M.NIB.tipping} mm at rest and up to ${(M.NIB.tipping + M.NIB.maxSpread).toFixed(1)} mm in this soft nib. A wider line asks for more ink, which loops back to step 5.</li>
+  </ol>
+  <p class="fp-try"><b>Try:</b> press 12 weights at 55 mm/s and watch the fins drain, then ease off and watch them refill. Press <i>Remove the fins</i> and repeat. Press <i>Warm the pen</i> with the fins on and off.</p>
+</section>`;
+
 const CSS = readFileSync(join(HERE, "fountain-pen.css"), "utf8");
 
 const DATA = { P, PZ, TAPE_W, SPOOL_X, SPOOL_Z, R_ROLL, R_FLANGE, FACE_Y: REEL_FACE, WEIGHTS, CONTACT: [0, 0, PZ] };
@@ -348,7 +391,7 @@ const plate = k.plateHtml({
     { mark: "flat", label: "Ink, in the cartridge and in the feed" },
   ],
   caption:
-    `A fountain pen cut along its length and held at ${Math.round((Pen.TILT * 180) / Math.PI)}° over a moving paper tape, drawn at ${U}:1. Weights on the tray press it down; the loupe magnifies the nib. Ink is pulled forward along a narrow channel by capillary action, and each time the cartridge has lost about ${M.BURP_VOLUME.toFixed(1)} µL a bubble of air is let in through the breather hole and travels back along the wider air channel. The numbers come from a simplified model of a soft nib and a water-based ink, not from a measured pen.`,
+    `A fountain pen cut along its length and held at 55° over a moving paper tape, drawn at ${U}:1. Weights on the tray press it down; the loupe magnifies the nib. Ink is pulled forward along a narrow channel by capillary action, and each time the cartridge has lost about ${M.BURP_VOLUME.toFixed(1)} µL a bubble of air is let in through the breather hole and travels back along the wider air channel. The numbers come from a simplified model of a soft nib and a water-based ink, not from a measured pen.`,
   body: `<div class="fp-stage" tabindex="0" role="group" aria-label="Fountain pen test rig: arrow keys add or remove weights, V seals the air channel, space pauses">${svg}</div>`,
 });
 
@@ -359,6 +402,8 @@ const PANEL = `
     <label class="fp-slide"><span>Weights</span><input type="range" data-pressure min="0" max="${WEIGHTS.count}" step="1" value="1"><b data-pressure-out>25 gf</b></label>
     <label class="fp-slide"><span>Speed</span><input type="range" data-speed min="${M.SPEED.min}" max="${M.SPEED.max}" step="1" value="30"><b data-speed-out>30 mm/s</b></label>
     <button type="button" class="fp-btn" data-vent aria-pressed="false">Seal the air channel</button>
+    <button type="button" class="fp-btn" data-fins aria-pressed="false">Remove the fins</button>
+    <button type="button" class="fp-btn" data-warm aria-pressed="false">Warm the pen (+4 K)</button>
   </div>
   <div class="fp-cards">
     <figure class="fp-card">
@@ -373,6 +418,7 @@ const PANEL = `
       <div class="fp-bar" role="img" aria-label="Ink left in the fins"><i data-buffer-bar></i></div>
       <svg class="fp-chart" viewBox="0 0 200 60" preserveAspectRatio="none" role="img" aria-label="Ink the paper takes and the feed delivers"><polyline class="fp-demand" data-flow-demand points=""/><polyline class="fp-supply" data-flow-supply points=""/></svg>
       <p class="fp-note" data-flow-note></p>
+      <p class="fp-note" data-heat-note></p>
     </figure>
     <figure class="fp-card">
       <figcaption>Reservoir</figcaption>
@@ -391,8 +437,8 @@ const PANEL = `
 const strip = (src) => src.replace(/^export /gm, "").replace(/^import .*$/gm, "");
 const model = strip(readFileSync(join(HERE, "model.mjs"), "utf8"));
 const penSrc = strip(readFileSync(join(HERE, "pen.mjs"), "utf8"));
-const live = `${model}\n${penSrc}\nconst DATA = ${JSON.stringify(DATA)};\n${readFileSync(join(HERE, "live.js"), "utf8")}`;
-const page = k.pageHtml({ title: "Fountain pen", theme, body: `<style>${CSS}</style>${plate}${PANEL}`, script: kitScript() + "\n" + live, width: 680 });
+const live = `${model}\n${penSrc}\nconst DATA = ${JSON.stringify(DATA)};\n${readFileSync(join(HERE, "live.js"), "utf8")}\n(() => {\nconst DATA2 = ${JSON.stringify(DATA2)};\n${readFileSync(join(HERE, "explode.js"), "utf8")}\n})();`;
+const page = k.pageHtml({ title: "Fountain pen", theme, body: `<style>${CSS}</style>${plate}${PANEL}${HOW}${plate2}${EXPLORER}`, script: kitScript() + "\n" + live, width: 680 });
 const AUTO_THEME = `<script>(()=>{const mq=matchMedia("(prefers-color-scheme: dark)");const set=()=>{document.body.dataset.theme=mq.matches?"dark":"light";document.documentElement.style.colorScheme=mq.matches?"dark":"light";};set();mq.addEventListener("change",set);})()</script>`;
 const name = theme === "light" ? "index.html" : "fountain-pen-dark.html";
 writeFileSync(join(HERE, name), theme === "light" ? page.replace('<body class="iso" data-theme="light">', `<body class="iso" data-theme="light">${AUTO_THEME}`) : page);
