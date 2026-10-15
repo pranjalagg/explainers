@@ -1,0 +1,58 @@
+.iso{
+  --fp-resin:#2b2b2e;--fp-feed:#3c3c40;--fp-nib:#1b1b1b;--fp-void:#09090a;--fp-cart:#222830;--fp-plug:#0d0d0e;
+  --fp-ink:#6b9bff;--fp-trace:#c3d3ff;--fp-ink-a:.5;--fp-paper:#1d1d1f;--fp-chart-bg:#0d0d0e;
+}
+.iso[data-theme="light"]{
+  --fp-resin:#f1eee8;--fp-feed:#bdbab3;--fp-nib:#ffffff;--fp-void:#82807a;--fp-cart:#e3eaf4;--fp-plug:#7a756e;
+  --fp-ink:#3e63dd;--fp-trace:#1f2d6b;--fp-ink-a:.55;--fp-paper:#ffffff;--fp-chart-bg:#f1f1ee;
+}
+.fp-cut{stroke:none}
+.fp-resin{fill:var(--fp-resin)}
+.fp-feed{fill:var(--fp-feed)}
+.fp-nib{fill:var(--fp-nib)}
+.fp-void{fill:var(--fp-void)}
+.fp-cart{fill:var(--fp-cart)}
+.fp-plug{fill:var(--fp-plug)}
+.fp-wall{fill:url(#fp-wall);stroke:none}
+.fp-ink{fill:var(--fp-ink);fill-opacity:var(--fp-ink-a);stroke:none}
+.fp-stage{outline:none;touch-action:pan-y}
+.fp-stage:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:6px}
+.fp-paper>.iso-fill{fill:var(--fp-paper)}
+.fp-glass{fill:var(--anatomy-paper)}
+.fp-tine{stroke:none}
+.fp-tine[data-t="3"]{fill:var(--anatomy-lit-top)}
+.fp-tine[data-t="2"]{fill:var(--anatomy-top)}
+.fp-tine[data-t="1"]{fill:var(--anatomy-shade-2)}
+.fp-tine[data-t="0"]{fill:var(--anatomy-shade-1)}
+.fp-tip{fill:var(--fp-nib);stroke:var(--anatomy-lit);stroke-width:var(--anatomy-weight)}
+.fp-bubble{fill:var(--anatomy-paper);stroke:var(--anatomy-mid);stroke-width:.6;transition:none}
+.fp-flow{fill:none;stroke:var(--fp-ink);stroke-width:1.1;stroke-dasharray:2.4 7;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.fp-trace{fill:var(--fp-trace);stroke:none}
+.fp-hole{fill:none;stroke:var(--anatomy-lo);stroke-width:1.5;stroke-linecap:round}
+.fp-spoke{fill:var(--anatomy-top);stroke:var(--anatomy-mid);stroke-width:.6;stroke-linejoin:round}
+.fp-mark{fill:var(--anatomy-dot);stroke:none}
+
+.fp-panel{margin:28px 0 0}
+.fp-controls{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin:0 0 18px}
+.fp-btn{font:11px/1 var(--anatomy-mono);letter-spacing:.04em;color:var(--anatomy-strong);background:transparent;border:0;box-shadow:0 0 0 1px var(--anatomy-faint);padding:9px 11px 8px;cursor:pointer;transition:color .2s,box-shadow .2s}
+.fp-btn:hover{box-shadow:0 0 0 1px var(--anatomy-mid)}
+.fp-btn:focus-visible,.fp-slide input:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:2px}
+.fp-btn[aria-pressed="true"][data-vent]{box-shadow:0 0 0 1px var(--anatomy-hi)}
+.fp-slide{display:flex;align-items:center;gap:10px;flex:1 1 190px;min-width:0;font:11px var(--anatomy-mono);color:var(--anatomy-muted)}
+.fp-slide input{flex:1;min-width:0;accent-color:var(--anatomy-hi)}
+.fp-slide b{min-width:6.5ch;font-weight:500;color:var(--anatomy-strong);text-align:right;font-variant-numeric:tabular-nums}
+.fp-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:14px}
+.fp-card{margin:0;background:var(--anatomy-card);box-shadow:0 0 0 1px var(--anatomy-faint);padding:14px;display:grid;gap:10px;align-content:start;min-width:0}
+.fp-card figcaption{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted)}
+.fp-big{margin:0;font:13px/1.4 var(--anatomy-mono);color:var(--anatomy-strong);font-variant-numeric:tabular-nums}
+.fp-chart{display:block;width:100%;height:64px;background:var(--fp-chart-bg)}
+.fp-chart polyline{fill:none;stroke:var(--anatomy-hi);stroke-width:1.2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.fp-chart .fp-demand{stroke:var(--anatomy-lo);stroke-width:1.4}
+.fp-chart .fp-supply{stroke:var(--fp-ink)}
+.fp-bar{height:8px;background:var(--fp-chart-bg);box-shadow:0 0 0 1px var(--anatomy-faint)}
+.fp-bar i{display:block;height:100%;width:100%;background:var(--fp-ink);opacity:.7}
+.fp-note{margin:0;font-size:12px;line-height:1.5;color:var(--anatomy-muted)}
+.fp-scale{list-style:none;display:flex;flex-wrap:wrap;gap:8px 22px;padding:0;margin:20px 0 0;font:12px var(--anatomy-mono);color:var(--anatomy-text)}
+.fp-scale b{font-weight:500;color:var(--anatomy-strong)}
+@media (prefers-reduced-motion:reduce){.fp-btn{transition:none}}
+@media (max-width:560px){.iso-plate{overflow:hidden}}
