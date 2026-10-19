@@ -1,0 +1,64 @@
+.iso{
+  --sg-cavity:#2b2b2f;--sg-glass:#ffffff;--sg-bar:#26262a;--sg-bank:#c2410c;--sg-total:#18181a;--sg-price:#8c8c90;--sg-liquid:#cfe5c4;--sg-liquid-top:#e4f1dd;--sg-liquid-shade:#b9d6ab;
+}
+.iso[data-theme="dark"]{
+  --sg-cavity:#060606;--sg-glass:#ffffff;--sg-bar:#d4d4d4;--sg-bank:#fb923c;--sg-total:#e6e6e6;--sg-price:#6e6e6e;--sg-liquid:#2f4a2a;--sg-liquid-top:#3d5e36;--sg-liquid-shade:#253c21;
+}
+.sg-cavity{fill:var(--sg-cavity)}
+.sg-slot{fill:var(--anatomy-lo)}
+.sg-glass{fill:var(--sg-glass);fill-opacity:.12}
+.sg-bar{fill:var(--sg-bar)}
+.sg-shine{stroke-width:1.4;opacity:.8}
+.sg-flow{stroke-dasharray:1.2 2.6;animation:sg-flow 1.6s linear infinite}
+@keyframes sg-flow{to{stroke-dashoffset:-7.6}}
+[data-lever] .iso-edge{transition:stroke .2s}
+[data-lever][data-open] .iso-edge{stroke:var(--anatomy-lit)}
+.sg-stage{outline:none;touch-action:pan-y}
+.sg-stage:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:6px}
+
+.sg-controls{display:flex;flex-wrap:wrap;gap:12px 18px;align-items:center;margin:28px 0 14px}
+.sg-play,.sg-step{font:11px/1 var(--anatomy-mono);letter-spacing:.04em;color:var(--anatomy-muted);background:transparent;border:0;box-shadow:0 0 0 1px var(--anatomy-faint);padding:8px 9px 7px;cursor:pointer;transition:color .2s,box-shadow .2s}
+.sg-play:hover,.sg-step:hover{color:var(--anatomy-text);box-shadow:0 0 0 1px var(--anatomy-mid)}
+.sg-play:focus-visible,.sg-step:focus-visible,.sg-field input:focus-visible{outline:1px solid var(--anatomy-muted);outline-offset:2px}
+.sg-step[aria-pressed="true"]{color:var(--anatomy-strong);box-shadow:0 0 0 1px var(--anatomy-hi)}
+.sg-play{color:var(--anatomy-strong)}
+.sg-steps{display:flex;flex-wrap:wrap;gap:5px}
+
+.sg-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px 22px;margin:0 0 20px}
+.sg-field{display:grid;gap:6px;font:11px/1.3 var(--anatomy-mono);color:var(--anatomy-muted);min-width:0}
+.sg-field span{display:flex;justify-content:space-between;gap:8px}
+.sg-field b{font-weight:500;color:var(--anatomy-strong);font-variant-numeric:tabular-nums}
+.sg-field input{width:100%;min-width:0;accent-color:var(--anatomy-hi)}
+
+.sg-card{margin:0 0 20px;background:var(--anatomy-card);box-shadow:0 0 0 1px var(--anatomy-faint);padding:14px;display:grid;gap:10px;min-width:0}
+.sg-card figcaption{font:11px/1.4 var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted)}
+.sg-chart{display:block;width:100%;height:auto}
+.sg-grid{stroke:var(--anatomy-faint);stroke-width:.6}
+.sg-tick{font:10px var(--anatomy-mono);fill:var(--anatomy-muted)}
+.sg-l{fill:none;stroke-width:1.6;stroke-linejoin:round}
+path.sg-l-bank{stroke:var(--sg-bank)}
+path.sg-l-total{stroke:var(--sg-total)}
+path.sg-l-price{stroke:var(--sg-price);stroke-width:1;stroke-dasharray:3 2}
+.sg-head{stroke:var(--anatomy-mid);stroke-width:.8}
+circle.sg-l-bank{fill:var(--sg-bank)}
+circle.sg-l-total{fill:var(--sg-total)}
+.sg-legend{list-style:none;display:flex;flex-wrap:wrap;gap:6px 18px;padding:0;margin:0;font-size:12px;color:var(--anatomy-text)}
+.sg-legend li{display:flex;align-items:center;gap:8px}
+.sg-sw{display:inline-block;width:16px;height:0;border-top:2px solid}
+.sg-sw.sg-l-bank{border-color:var(--sg-bank)}
+.sg-sw.sg-l-total{border-color:var(--sg-total)}
+.sg-sw.sg-l-price{border-top:1.5px dashed var(--sg-price)}
+
+.sg-table{width:100%;border-collapse:collapse;font-size:13px;line-height:1.45;color:var(--anatomy-text)}
+.sg-table th,.sg-table td{text-align:left;vertical-align:top;padding:8px 10px 8px 0;border-top:1px solid var(--anatomy-faint)}
+.sg-table thead th{font:11px var(--anatomy-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--anatomy-muted);border-top:0}
+.sg-table tbody th{font-weight:500;color:var(--anatomy-strong);width:28%}
+.sg-table td{width:36%;font-variant-numeric:tabular-nums}
+.sg-note{margin:18px 0 0;font-size:14px;line-height:1.55;color:var(--anatomy-strong)}
+.sg-fine{margin:12px 0 0;font-size:12px;line-height:1.55;color:var(--anatomy-muted)}
+
+@media (prefers-reduced-motion:reduce){.sg-flow{animation:none}}
+@media (max-width:560px){.iso-plate{overflow:hidden}.sg-table{font-size:12px}.sg-table tbody th{width:30%}}
+.iso .sg-income[data-lit]>.iso-fill,.iso .sg-income[data-lit]>.iso-shade{fill:var(--sg-liquid-shade)}
+.iso .sg-income[data-lit]>.iso-shade[data-shade="2"],.iso .sg-income[data-lit]>.iso-shade[data-shade="3"]{fill:var(--sg-liquid)}
+.iso .sg-income[data-lit]>.iso-top{fill:var(--sg-liquid-top)}
