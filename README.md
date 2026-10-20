@@ -7,6 +7,7 @@ Interactive isometric figures, one per folder. Each figure is a standalone HTML 
 | [`root-canal/`](root-canal/) | Root canal treatment: a sectioned premolar on a bench rig, through seven stages |
 | [`ct-scanner/`](ct-scanner/) | CT scanner: a gantry and rotor take projections, which are reconstructed into a slice read in Hounsfield units |
 | [`fountain-pen/`](fountain-pen/) | Fountain pen: a sectioned pen on a test rig, with capillary ink feed, a fin buffer and an air channel that lets bubbles in |
+| [`keyboard-switches/`](keyboard-switches/) | Keyboard switches: seven cut-open switches on a bench with a pressing probe, force and sensing curves, and notes on every source (`RESEARCH.md`) |
 
 ## Layout
 
