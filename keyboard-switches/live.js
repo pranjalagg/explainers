@@ -272,20 +272,21 @@ function drawField(s) {
   const str = hallSignal(s.x);
   let d = "";
   for (let k = 0; k < 5; k++) {
-    const x0 = (k - 2) * 2.7;
+    const xm = (k - 2) * 3.25, xs = (k - 2) * 3;
     const pts = [];
     for (let i = 0; i <= 10; i++) {
       const t = i / 10;
-      pts.push(iso([x0 + (k - 2) * 2.4 * Math.sin(Math.PI * t) * (0.4 + 0.6 * (1 - str)), 0, zMag + (zSen - zMag) * t], D.P));
+      pts.push(iso([xm + (xs - xm) * t + (k - 2) * 2.4 * Math.sin(Math.PI * t) * (0.4 + 0.6 * (1 - str)), 0, zMag + (zSen - zMag) * t], D.P));
     }
     d += poly(pts);
   }
   const path = s.field.firstChild || s.field.appendChild(document.createElementNS(NS, "path"));
   path.setAttribute("class", "iso-line");
   path.setAttribute("data-tone", "lit");
+  path.setAttribute("data-free", "both");
   path.setAttribute("d", d);
-  path.style.strokeWidth = String(0.5 + 1.1 * str);
-  path.style.opacity = String(0.18 + 0.82 * str);
+  path.style.strokeWidth = String(0.7 + 1.3 * str);
+  path.style.opacity = String(0.35 + 0.65 * str);
 }
 
 // ---------- the gantry ----------
@@ -349,7 +350,7 @@ function tick(now) {
   const before = S.x;
   S.x = follow(S.x, tgt, dt, S.auto ? 0.0001 : (tgt >= S.x ? 0.045 : 0.075), calm);
   S.vel = (S.x - before) / Math.max(dt, 1e-3);
-  const wantDir = S.vel < -0.15 ? 1 : S.vel > 0.15 ? 0 : S.dir;
+  const wantDir = S.x < 0.02 ? 0 : S.vel < -0.15 ? 1 : S.vel > 0.15 ? 0 : S.dir;
   S.dir = follow(S.dir, wantDir, dt, 0.05, calm);
 
   // the gantry: lift, traverse, lower
