@@ -1,0 +1,57 @@
+
+<section class="sd-panel" aria-label="Controls and numbers">
+  <div class="sd-presets" role="group" aria-label="Rain presets">
+    <button type="button" class="sd-btn" data-rain-to="5">Drizzle</button>
+    <button type="button" class="sd-btn" data-rain-to="25">Steady rain</button>
+    <button type="button" class="sd-btn" data-rain-to="75">Design storm</button>
+    <button type="button" class="sd-btn" data-rain-to="150">Cloudburst</button>
+    <button type="button" class="sd-btn" data-clog aria-pressed="false">Leaves on the inlet</button>
+    <button type="button" class="sd-btn" data-reset>Reset slopes</button>
+  </div>
+  <div class="sd-sliders">
+    <label class="sd-slide"><span>Rain</span><input type="range" data-rain min="0" max="150" step="1" value="75"><b data-rain-out>75 mm/h</b></label>
+    <label class="sd-slide"><span>Cross slope</span><input type="range" data-sx min="0.5" max="4" step="0.1" value="2"><b data-sx-out>2.0 %</b></label>
+    <label class="sd-slide"><span>Grade</span><input type="range" data-sl min="0.3" max="5" step="0.1" value="1"><b data-sl-out>1.0 %</b></label>
+  </div>
+  <div class="sd-cards">
+    <figure class="sd-card">
+      <figcaption>Gutter</figcaption>
+      <p class="sd-big" data-gutter>&nbsp;</p>
+      <div class="sd-bar" aria-hidden="true"><i data-spread-bar></i><s data-allow-mark></s></div>
+      <p class="sd-note" data-gutter-note>&nbsp;</p>
+    </figure>
+    <figure class="sd-card">
+      <figcaption>Curb opening</figcaption>
+      <p class="sd-big" data-inlet>&nbsp;</p>
+      <div class="sd-bar" aria-hidden="true"><i data-inlet-bar></i></div>
+      <p class="sd-note" data-inlet-note>&nbsp;</p>
+    </figure>
+    <figure class="sd-card">
+      <figcaption>Pipes underground</figcaption>
+      <p class="sd-big" data-pipes>&nbsp;</p>
+      <div class="sd-bar" aria-hidden="true"><i data-main-bar></i></div>
+      <p class="sd-note" data-pipes-note>&nbsp;</p>
+    </figure>
+    <figure class="sd-card">
+      <figcaption>Gravity vs surface tension</figcaption>
+      <p class="sd-big" data-bond>&nbsp;</p>
+      <p class="sd-note" data-bond-note>&nbsp;</p>
+    </figure>
+  </div>
+</section>
+
+<section class="sd-check" aria-labelledby="sd-check-h">
+  <h2 id="sd-check-h">Checking the claim</h2>
+  <p class="sd-quote">“Those concrete curbs and gutters aren’t just for blocking tires. They are precision-engineered fluid dynamics systems. They are sloped at highly specific micro-angles to exploit surface tension and gravity, ensuring that a city doesn’t instantly turn into a swamp during a downpour by forcing water to organize itself into hidden underground rivers.”</p>
+  <ol class="sd-claims">
+    <li data-verdict="true"><b>Not just for tires.</b> <span>True.</span> A curb guides wheels and protects people on the sidewalk, holds the edge of the pavement in place, and with the gutter pan in front of it forms the channel that carries runoff. US drainage manuals (FHWA HEC-22) design that channel with its own equations.</li>
+    <li data-verdict="mixed"><b>“Precision-engineered fluid dynamics.”</b> <span>Engineered, yes; precision, not really.</span> The design is open-channel hydraulics: Manning’s equation adapted by Izzard to a triangular gutter. The engineer checks how far the water may spread into the road and places inlets so it never spreads further. The numbers are rules of thumb with wide tolerances, not fine fluid dynamics.</li>
+    <li data-verdict="mixed"><b>“Highly specific micro-angles.”</b> <span>Small, but not specific.</span> A road usually falls about 2 % from its crown to the gutter, about 1.1°, and 1.5–4 % are all common. The gutter pan is often steeper (about 8 %, 1 inch per foot). Along the street the gutter needs at least about 0.3–0.5 %, because flatter grades are hard to build and leave puddles. Try the sliders: the system works across that whole range.</li>
+    <li data-verdict="false"><b>“Exploit surface tension.”</b> <span>False.</span> Surface tension only competes with gravity in water shallower than its capillary length, about 2.7 mm. The flow at the curb is several centimetres deep, where gravity is hundreds of times stronger (the Bond number in the card above). Where surface tension does matter, it works against drainage: it holds the last thin film and the drops in shallow puddles.</li>
+    <li data-verdict="mixed"><b>“Instantly turn into a swamp.”</b> <span>Roughly right about the cause.</span> Paved ground soaks up little, so far more rain runs off it. One widely cited table puts runoff at about 10 % of rainfall under natural cover and about 55 % where 75–100 % of the ground is paved. A city would flood its low points, not turn into a swamp.</li>
+    <li data-verdict="true"><b>“Hidden underground rivers.”</b> <span>Fair as a metaphor, and sometimes literal.</span> Inlets feed storm sewers that run to streams or the sea. Some cities buried real rivers in pipes; London’s River Fleet still runs in a sewer. In about 700 older US communities, stormwater shares a pipe with sewage, and heavy rain overflows the mix straight into rivers (combined sewer overflows).</li>
+    <li data-verdict="false"><b>“The Urban Canopy Effect.”</b> <span>Wrong term.</span> The urban canopy layer is a weather term for the air between the buildings, below roof height. The idea the passage needs is runoff from impervious surfaces.</li>
+  </ol>
+  <p class="sd-src">Sources: <a href="https://rosap.ntl.bts.gov/view/dot/62628/dot_62628_DS1.pdf">FHWA HEC-22, Urban Drainage Design Manual</a> (gutter and curb-opening equations) · <a href="https://iowadot.gov/design-manual/chapter-4-drainage/4a-6-calculating-spread-and-checking-intake-location">Iowa DOT, calculating spread</a> · <a href="https://www.iowasudas.org/wp-content/uploads/sites/15/2020/03/2C-1.pdf">Iowa SUDAS 2C-1</a> and <a href="https://www.oregon.gov/odot/hydraulics/Docs_Hydraulics_Manual/Hydraulics-13-A.pdf">ODOT Hydraulics Manual</a> (cross slopes and minimum gutter grades) · <a href="https://www.environment.fhwa.dot.gov/env_topics/water/ultraurban_bmp_rpt/fig1txt.htm">FHWA, runoff and impervious cover</a> · <a href="https://www.epa.gov/npdes/where-combined-sewer-overflows-are-located">EPA, where CSOs are located</a> · <a href="https://glossary.ametsoc.org/wiki/urban-canopy-layer/">AMS Glossary, urban canopy layer</a>.</p>
+  <p class="sd-src">The model: the 1.5 m opening takes the gutter flow from 90 m of street and a 15 m strip beside it (runoff coefficient 0.85, rational method). The gutter has a 0.6 m pan depressed 38 mm, Manning’s n of 0.016 and a 3.0 m design spread. The 300 mm lead runs at 2 % to a 450 mm storm main at 0.5 % that serves 0.9 ha. Rain is held steady, so the figure shows the peak flow, not how it builds up.</p>
+</section>

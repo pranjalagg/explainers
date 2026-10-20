@@ -7,6 +7,7 @@ Interactive isometric figures, one per folder. Each figure is a standalone HTML 
 | [`root-canal/`](root-canal/) | Root canal treatment: a sectioned premolar on a bench rig, through seven stages |
 | [`ct-scanner/`](ct-scanner/) | CT scanner: a gantry and rotor take projections, which are reconstructed into a slice read in Hounsfield units |
 | [`fountain-pen/`](fountain-pen/) | Fountain pen: a sectioned pen on a test rig, with capillary ink feed, a fin buffer and an air channel that lets bubbles in |
+| [`street-drainage/`](street-drainage/) | Curb and gutter: a cutaway street under a rainfall simulator, with gutter spread, curb-opening capture and storm pipes from the HEC-22 equations, plus a fact check |
 
 ## Layout
 
