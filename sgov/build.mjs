@@ -333,6 +333,41 @@ const PANEL = `
       <li><span class="sg-sw sg-l-price"></span>SGOV shares alone (drops each payout)</li>
     </ul>
   </figure>
+  <section class="sg-card sg-timing" aria-label="Does timing matter?">
+    <h2 class="sg-h">Does it matter when you buy and sell?</h2>
+    <p class="sg-p">With a stock, the price moves on news, so the day you buy or sell changes what you make. SGOV's price moves for one reason only: the interest its bills have built up since the last payout. When you buy, the price already includes the interest built up so far, so you pay for it. When you sell, the price includes the interest built up since then, so you get it back. Either way you keep exactly the interest for the days you held, as in a savings account. Pick any two days below to check.</p>
+    <div class="sg-inputs sg-inputs-2">
+      <label class="sg-field"><span>Buy on <b data-out="buy"></b></span><input type="range" data-hold-in="buy" min="0" max="363" step="1" value="78"></label>
+      <label class="sg-field"><span>Sell on <b data-out="sell"></b></span><input type="range" data-hold-in="sell" min="1" max="364" step="1" value="129"></label>
+    </div>
+    <div class="sg-presets" role="group" aria-label="Try">
+      <button type="button" class="sg-step" data-preset="before">Buy the day before a payout, sell the day after</button>
+      <button type="button" class="sg-step" data-preset="month">Hold mid-month to mid-month</button>
+      <button type="button" class="sg-step" data-preset="year">Hold all year</button>
+    </div>
+    <svg class="sg-saw" data-saw viewBox="0 0 600 150" role="img" aria-label="SGOV share price over the year, with your buy and sell days marked">
+      <rect class="sg-held" data-held x="0" y="10" width="0" height="112"/>
+      <g data-saw-grid></g>
+      <path class="sg-saw-line" data-saw-line/>
+      <g data-saw-pay></g>
+      <line class="sg-mark" data-mark="buy" y1="10" y2="122"/>
+      <line class="sg-mark" data-mark="sell" y1="10" y2="122"/>
+      <circle class="sg-pin" data-pin="buy" r="4"/>
+      <circle class="sg-pin" data-pin="sell" r="4"/>
+    </svg>
+    <table class="sg-ledger">
+      <tbody>
+        <tr><th>You pay, per share</th><td data-l="paid"></td></tr>
+        <tr><th>Payouts while you hold</th><td data-l="got"></td></tr>
+        <tr><th>You sell for</th><td data-l="sold"></td></tr>
+        <tr class="sg-sum"><th>You made, per share</th><td data-l="gain"></td></tr>
+        <tr><th>Interest for the days you held</th><td data-l="earned"></td></tr>
+        <tr class="sg-sum"><th>On your deposit</th><td data-l="dollars"></td></tr>
+      </tbody>
+    </table>
+    <p class="sg-note" data-l="say" aria-live="polite"></p>
+    <p class="sg-fine">What can still differ, and by how little: a buy or sell crosses the bid-ask spread (about a cent a share); if rates jump a full point overnight, the price dips about 0.1% (ten cents), which the fund earns back within weeks as its bills mature at $100; and buying just before a payout turns some of what you paid into a taxable payout and a matching capital loss when you sell.</p>
+  </section>
   <table class="sg-table">
     <thead><tr><th></th><th>SGOV</th><th>High-yield savings</th></tr></thead>
     <tbody>

@@ -117,3 +117,29 @@ export function stateAt(sim, schedule, t, opts) {
 
 export const money = (v, digits = 2) => `$${v.toLocaleString("en-US", { minimumFractionDigits: digits, maximumFractionDigits: digits })}`;
 export const pct = (v, digits = 2) => `${v.toFixed(digits)}%`;
+
+export const dayLabel = (d) => {
+  const m = monthOf(d);
+  return `${MONTHS[m]} ${d - STARTS[m] + 1}`;
+};
+
+// Buy at the price on one day, sell at the price on a later day, and collect every payout whose ex-date falls in
+// between. Because the price is the principal plus the income built up so far, what you pay for that income on the
+// way in, and get back for it on the way out, cancels: you keep exactly the days you held.
+export function holding(sim, buy, sell, opts) {
+  const paid = sim.price[buy];
+  const sold = sim.price[sell];
+  const payouts = sim.payouts.filter((p) => p.day > buy && p.day <= sell);
+  const got = payouts.reduce((sum, p) => sum + p.perShare, 0);
+  const gain = sold - paid + got;
+  const days = sell - buy;
+  let earned = 0;
+  for (let d = buy; d < sell; d++) earned += (BASE * sim.net[d]) / 100 / 365;
+  const shares = opts.deposit / paid;
+  return {
+    paid, sold, payouts, got, gain, days, earned, shares,
+    dollars: gain * shares,
+    annual: days ? (gain / paid) * (365 / days) * 100 : 0,
+    bank: opts.deposit * (Math.pow(1 + opts.apy / 100, days / 365) - 1),
+  };
+}

@@ -239,6 +239,76 @@ function recompute() {
   sim = run(schedule, opts);
   drawChart();
   writeInputs();
+  drawTiming();
+}
+
+// ---- Does timing matter? -----------------------------------------------------------------------------------------
+const holdIn = Object.fromEntries([...document.querySelectorAll("[data-hold-in]")].map((el) => [el.dataset.holdIn, el]));
+const ledger = Object.fromEntries([...document.querySelectorAll("[data-l]")].map((el) => [el.dataset.l, el]));
+const saw = document.querySelector("[data-saw]");
+const sawQ = (sel) => saw.querySelector(sel);
+const SW = { x0: 46, x1: 590, y0: 12, y1: 120 };
+const swx = (d) => SW.x0 + (d / YEAR) * (SW.x1 - SW.x0);
+function drawTiming() {
+  let buy = Number(holdIn.buy.value), sell = Number(holdIn.sell.value);
+  if (sell <= buy) {
+    sell = Math.min(364, buy + 1);
+    holdIn.sell.value = String(sell);
+  }
+  const h = holding(sim, buy, sell, opts);
+  const top = Math.max(...sim.price) + 0.02;
+  const swy = (p) => SW.y1 - ((p - BASE + 0.02) / (top - BASE + 0.02)) * (SW.y1 - SW.y0);
+  let d = "";
+  for (let i = 0; i < YEAR; i++) {
+    const X = swx(i).toFixed(1);
+    if (!i) d += `M${X} ${swy(sim.price[0]).toFixed(1)}`;
+    else if (STARTS.includes(i)) d += `L${X} ${swy(sim.price[i - 1] + (sim.price[i - 1] - sim.price[i - 2])).toFixed(1)}L${X} ${swy(sim.price[i]).toFixed(1)}`;
+    else d += `L${X} ${swy(sim.price[i]).toFixed(1)}`;
+  }
+  sawQ("[data-saw-line]").setAttribute("d", d);
+  const grid = [];
+  STARTS.forEach((s, i) => grid.push(`<text class="sg-tick" x="${swx(s + MONTH_DAYS[i] / 2)}" y="${SW.y1 + 18}" text-anchor="middle">${MONTHS[i][0]}</text>`));
+  for (const p of [BASE, BASE + 0.1, BASE + 0.2, BASE + 0.3]) {
+    if (p > top) continue;
+    grid.push(`<line class="sg-grid" x1="${SW.x0}" x2="${SW.x1}" y1="${swy(p)}" y2="${swy(p)}"/>`);
+    grid.push(`<text class="sg-tick" x="${SW.x0 - 6}" y="${swy(p) + 3.5}" text-anchor="end">${p.toFixed(2)}</text>`);
+  }
+  sawQ("[data-saw-grid]").innerHTML = grid.join("");
+  sawQ("[data-saw-pay]").innerHTML = h.payouts.map((p) => `<circle class="sg-coin" cx="${swx(p.day)}" cy="${SW.y1 + 4}" r="3"/>`).join("");
+  const held = sawQ("[data-held]");
+  held.setAttribute("x", swx(buy).toFixed(1));
+  held.setAttribute("width", (swx(sell) - swx(buy)).toFixed(1));
+  for (const [key, day, price] of [["buy", buy, h.paid], ["sell", sell, h.sold]]) {
+    const X = swx(day).toFixed(1);
+    const m = sawQ(`[data-mark="${key}"]`);
+    m.setAttribute("x1", X);
+    m.setAttribute("x2", X);
+    const pin = sawQ(`[data-pin="${key}"]`);
+    pin.setAttribute("cx", X);
+    pin.setAttribute("cy", swy(price).toFixed(1));
+  }
+  outs.buy.textContent = dayLabel(buy);
+  outs.sell.textContent = dayLabel(sell);
+  const inPaid = h.paid - BASE, inSold = h.sold - BASE;
+  ledger.paid.textContent = `${money(h.paid)}, on ${dayLabel(buy)} (includes ${money(inPaid, 3)} of interest already built up)`;
+  ledger.got.textContent = h.payouts.length ? `${money(h.got, 3)} (${h.payouts.length} payout${h.payouts.length > 1 ? "s" : ""})` : "None";
+  ledger.sold.textContent = `${money(h.sold)}, on ${dayLabel(sell)} (includes ${money(inSold, 3)} built up since the last payout)`;
+  ledger.gain.textContent = `${money(h.gain, 3)}  =  ${money(h.sold)} − ${money(h.paid)} + ${money(h.got, 3)}`;
+  ledger.earned.textContent = `${money(h.earned, 3)}  (${h.days} day${h.days > 1 ? "s" : ""} at ${pct(h.annual)} a year)`;
+  ledger.dollars.textContent = `${money(h.dollars)} on ${money(opts.deposit, 0)}; a savings account at ${pct(opts.apy)} pays ${money(h.bank)} for the same ${h.days} days`;
+  ledger.say.textContent = h.payouts.length && h.days <= 3
+    ? `You collected a ${money(h.got, 3)} payout, but you paid ${money(inPaid, 3)} for it in the price and the price fell by the payout after the ex-date. Net, you made only ${h.days} day${h.days > 1 ? "s" : ""} of interest. There is no shortcut to the payout.`
+    : `Same as a savings account: ${h.days} days held, ${h.days} days of interest, whichever days you pick. Where in the month you buy or sell only changes how the money arrives (more as payouts, or more in the sale price), not how much.`;
+}
+for (const el of Object.values(holdIn)) el.addEventListener("input", drawTiming);
+for (const btn of document.querySelectorAll("[data-preset]")) {
+  btn.addEventListener("click", () => {
+    const kind = btn.dataset.preset;
+    const [b, s] = kind === "before" ? [STARTS[4] - 1, STARTS[4] + 1] : kind === "month" ? [STARTS[2] + 14, STARTS[3] + 14] : [0, 364];
+    holdIn.buy.value = String(b);
+    holdIn.sell.value = String(s);
+    drawTiming();
+  });
 }
 
 function setRate(rate) {
