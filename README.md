@@ -7,6 +7,7 @@ Interactive isometric figures, one per folder. Each figure is a standalone HTML 
 | [`root-canal/`](root-canal/) | Root canal treatment: a sectioned premolar on a bench rig, through seven stages |
 | [`ct-scanner/`](ct-scanner/) | CT scanner: a gantry and rotor take projections, which are reconstructed into a slice read in Hounsfield units |
 | [`fountain-pen/`](fountain-pen/) | Fountain pen: a sectioned pen on a test rig, with capillary ink feed, a fin buffer and an air channel that lets bubbles in |
+| [`transformer/`](transformer/) | Transformer: a real two-layer language model, small enough to read, run as a production line of lanes, attention cords, memory drawers and a sampling marble |
 
 ## Layout
 
@@ -20,6 +21,8 @@ kit/                vendored drawing kit (MIT, from anatomy)
   *.css             figure styles
   index.html        built page (committed, so Pages needs no build step)
 ```
+
+`transformer/` also has `model.mjs`, a hand-weighted decoder-only transformer (RMSNorm, RoPE, causal multi-head attention, SwiGLU memories, residual stream, softmax sampling) that the figure runs live, and `layout.mjs`, the shared world coordinates. Its claims are tested with `node --test transformer/model.test.mjs`.
 
 ## Build
 
